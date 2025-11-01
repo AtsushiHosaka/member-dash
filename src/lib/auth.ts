@@ -18,7 +18,13 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { userId: credentials.userId },
-          include: { school: true }
+          include: {
+            schoolLinks: {
+              include: {
+                school: true
+              }
+            }
+          }
         })
 
         if (!user) {
@@ -36,11 +42,13 @@ export const authOptions: NextAuthOptions = {
 
         return {
           id: user.id,
-          email: user.email || user.userId,
+          email: user.userId,
           name: user.name,
-          schoolId: user.schoolId,
-          schoolName: user.school.name,
-          course: user.course,
+          schools: user.schoolLinks.map(link => ({
+            id: link.school.id,
+            name: link.school.name
+          })),
+          courses: user.courses,
           avatar: user.avatar,
           role: user.role,
           userId: user.userId
@@ -52,9 +60,8 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.schoolId = (user as any).schoolId
-        token.schoolName = (user as any).schoolName
-        token.course = (user as any).course
+        token.schools = (user as any).schools
+        token.courses = (user as any).courses
         token.avatar = (user as any).avatar
         token.role = (user as any).role
         token.userId = (user as any).userId
@@ -64,9 +71,8 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id
-        ;(session.user as any).schoolId = token.schoolId
-        ;(session.user as any).schoolName = token.schoolName
-        ;(session.user as any).course = token.course
+        ;(session.user as any).schools = token.schools
+        ;(session.user as any).courses = token.courses
         ;(session.user as any).avatar = token.avatar
         ;(session.user as any).role = token.role
         ;(session.user as any).userId = token.userId

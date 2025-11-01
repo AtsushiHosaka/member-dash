@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 interface RankingUser {
   id: string
   name: string
-  course: string
+  courses: string[]
   avatar: string | null
   totalDuration: number
   isActive: boolean
@@ -82,7 +82,7 @@ export default function Ranking({ users, currentUserId }: RankingProps) {
                     <span className="text-blue-600 text-sm ml-2">(あなた)</span>
                   )}
                 </div>
-                <div className="text-sm text-gray-600">{user.course}</div>
+                <div className="text-sm text-gray-600">{user.courses.join(', ')}</div>
               </div>
 
               <div className="text-right">

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Timer from '@/components/Timer'
 import SessionModal from '@/components/SessionModal'
@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false)
   const [ranking, setRanking] = useState([])
   const [activeMembers, setActiveMembers] = useState([])
+  const [gachaTickets, setGachaTickets] = useState(0)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -37,6 +38,7 @@ export default function Dashboard() {
       fetchActiveSession()
       fetchRanking()
       fetchActiveMembers()
+      fetchUserTickets()
     }
   }, [status])
 
@@ -67,6 +69,16 @@ export default function Dashboard() {
       setActiveMembers(data)
     } catch (error) {
       console.error('Failed to fetch active members:', error)
+    }
+  }
+
+  const fetchUserTickets = async () => {
+    try {
+      const response = await fetch('/api/user')
+      const data = await response.json()
+      setGachaTickets(data.gachaTickets || 0)
+    } catch (error) {
+      console.error('Failed to fetch user tickets:', error)
     }
   }
 
@@ -110,10 +122,17 @@ export default function Dashboard() {
       })
 
       if (response.ok) {
+        const data = await response.json()
         setActiveSession(null)
         setIsModalOpen(false)
         fetchRanking()
         fetchActiveMembers()
+        fetchUserTickets()
+
+        // ガチャ券を獲得した場合は通知
+        if (data.ticketsEarned > 0) {
+          alert(`おめでとうございます！ガチャ券を${data.ticketsEarned}枚獲得しました！`)
+        }
       } else {
         const error = await response.json()
         alert(error.error || '開発終了に失敗しました')
@@ -165,16 +184,28 @@ export default function Dashboard() {
                 >
                   スクール管理
                 </button>
+                <button
+                  onClick={() => router.push('/admin/badges')}
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  バッジ管理
+                </button>
               </>
             )}
+            <button
+              onClick={() => router.push('/gacha')}
+              className="text-sm text-blue-600 hover:text-blue-800 font-semibold"
+            >
+              ガチャ (🎫 {gachaTickets}枚)
+            </button>
             <span className="text-sm text-gray-600">
-              {session.user?.name}さん（{(session.user as any)?.schoolName}）
+              {session.user?.name}
             </span>
             <button
-              onClick={() => signOut()}
-              className="text-sm text-gray-600 hover:text-gray-900"
+              onClick={() => router.push('/account')}
+              className="text-sm text-blue-600 hover:text-blue-800"
             >
-              ログアウト
+              アカウント設定
             </button>
           </div>
         </div>

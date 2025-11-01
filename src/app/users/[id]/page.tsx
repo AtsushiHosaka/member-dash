@@ -13,16 +13,33 @@ interface UserSession {
   isActive: boolean
 }
 
+interface Badge {
+  id: string
+  name: string
+  icon: string
+  rarity: string
+}
+
+interface UserBadge {
+  id: string
+  badge: Badge
+  obtainedAt: string
+}
+
 interface UserDetail {
   id: string
   userId: string
   name: string
-  course: string
+  courses: string[]
   avatar: string | null
-  school: {
-    name: string
-  }
+  schoolLinks: Array<{
+    school: {
+      id: string
+      name: string
+    }
+  }>
   sessions: UserSession[]
+  userBadges: UserBadge[]
 }
 
 export default function UserDetailPage() {
@@ -66,6 +83,36 @@ export default function UserDetailPage() {
       hour: '2-digit',
       minute: '2-digit'
     })
+  }
+
+  const getRarityColor = (rarity: string) => {
+    switch (rarity) {
+      case 'common':
+        return 'bg-gray-200 text-gray-800'
+      case 'rare':
+        return 'bg-blue-200 text-blue-800'
+      case 'epic':
+        return 'bg-purple-200 text-purple-800'
+      case 'legendary':
+        return 'bg-yellow-200 text-yellow-800'
+      default:
+        return 'bg-gray-200 text-gray-800'
+    }
+  }
+
+  const getRarityName = (rarity: string) => {
+    switch (rarity) {
+      case 'common':
+        return 'コモン'
+      case 'rare':
+        return 'レア'
+      case 'epic':
+        return 'エピック'
+      case 'legendary':
+        return '伝説'
+      default:
+        return rarity
+    }
   }
 
   if (loading) {
@@ -117,7 +164,9 @@ export default function UserDetailPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{user.name}</h1>
               <p className="text-gray-600">@{user.userId}</p>
-              <p className="text-sm text-gray-500">{user.course} | {user.school.name}</p>
+              <p className="text-sm text-gray-500">
+                {user.courses.join(', ')} | {user.schoolLinks.map(link => link.school.name).join(', ')}
+              </p>
             </div>
           </div>
 
@@ -130,6 +179,38 @@ export default function UserDetailPage() {
               {completedSessions.length}セッション
             </div>
           </div>
+        </div>
+
+        {/* 獲得バッヂ */}
+        <div className="bg-white rounded-lg shadow-md mb-6">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-xl font-bold">獲得バッヂ</h2>
+          </div>
+
+          {user.userBadges.length === 0 ? (
+            <div className="px-6 py-8 text-center text-gray-500">
+              まだバッヂを獲得していません
+            </div>
+          ) : (
+            <div className="p-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {user.userBadges.map((userBadge) => (
+                  <div
+                    key={userBadge.id}
+                    className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition"
+                  >
+                    <div className="text-5xl mb-3">{userBadge.badge.icon}</div>
+                    <div className="text-sm font-semibold text-gray-900 text-center mb-2">
+                      {userBadge.badge.name}
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${getRarityColor(userBadge.badge.rarity)}`}>
+                      {getRarityName(userBadge.badge.rarity)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 開発履歴 */}

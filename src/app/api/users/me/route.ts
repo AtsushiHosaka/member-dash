@@ -3,24 +3,26 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+// 現在のユーザー情報を取得
+export async function GET() {
   try {
-    const { id } = await params
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: '認証が必要です' },
+        { status: 401 }
+      )
+    }
+
+    const userId = (session.user as any).id
 
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { id: userId },
       include: {
         schoolLinks: {
           include: {
             school: true
-          }
-        },
-        sessions: {
-          orderBy: {
-            startTime: 'desc'
           }
         },
         userBadges: {
@@ -54,40 +56,40 @@ export async function GET(
   }
 }
 
-// ユーザープロフィールを更新
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+// 現在のユーザー情報を更新
+export async function PUT(request: Request) {
   try {
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+      return NextResponse.json(
+        { error: '認証が必要です' },
+        { status: 401 }
+      )
     }
 
-    const { id } = await params
     const userId = (session.user as any).id
-
-    // 自分のプロフィールのみ編集可能（管理者は除く）
-    const userRole = (session.user as any).role
-    if (id !== userId && userRole !== 'admin') {
-      return NextResponse.json({ error: '権限がありません' }, { status: 403 })
-    }
-
-    const { name, courses, schoolIds, avatar } = await request.json()
+    const body = await request.json()
+    const { name, avatar, courses, schoolIds } = body
 
     // バリデーション
-    if (courses && (!Array.isArray(courses) || courses.length === 0)) {
+    if (!name || name.trim() === '') {
       return NextResponse.json(
-        { error: 'コースは1つ以上選択してください' },
+        { error: '名前は必須です' },
         { status: 400 }
       )
     }
 
-    if (schoolIds && (!Array.isArray(schoolIds) || schoolIds.length === 0)) {
+    if (!courses || courses.length === 0) {
       return NextResponse.json(
-        { error: '校舎は1つ以上選択してください' },
+        { error: '少なくとも1つのコースを選択してください' },
+        { status: 400 }
+      )
+    }
+
+    if (!schoolIds || schoolIds.length === 0) {
+      return NextResponse.json(
+        { error: '少なくとも1つの校舎を選択してください' },
         { status: 400 }
       )
     }
@@ -96,37 +98,30 @@ export async function PATCH(
     const updatedUser = await prisma.$transaction(async (tx) => {
       // ユーザー情報を更新
       const user = await tx.user.update({
-        where: { id },
+        where: { id: userId },
         data: {
-          ...(name && { name }),
-          ...(courses && { courses }),
-          ...(avatar !== undefined && { avatar })
+          name: name.trim(),
+          avatar: avatar || null,
+          courses: courses
         }
       })
 
-      // schoolIdsが提供された場合、schoolLinksを更新
-      if (schoolIds) {
-        // 既存のschoolLinksを削除
-        await tx.userSchool.deleteMany({
-          where: { userId: id }
-        })
+      // 既存のスクールリンクを削除
+      await tx.userSchool.deleteMany({
+        where: { userId }
+      })
 
-        // 新しいschoolLinksを作成
-        await Promise.all(
-          schoolIds.map((schoolId: string) =>
-            tx.userSchool.create({
-              data: {
-                userId: id,
-                schoolId
-              }
-            })
-          )
-        )
-      }
+      // 新しいスクールリンクを作成
+      await tx.userSchool.createMany({
+        data: schoolIds.map((schoolId: string) => ({
+          userId,
+          schoolId
+        }))
+      })
 
-      // 更新後のユーザー情報を取得
+      // 更新後のユーザー情報を取得（schoolLinksを含む）
       return await tx.user.findUnique({
-        where: { id },
+        where: { id: userId },
         include: {
           schoolLinks: {
             include: {
@@ -147,8 +142,8 @@ export async function PATCH(
 
     if (!updatedUser) {
       return NextResponse.json(
-        { error: 'ユーザーが見つかりません' },
-        { status: 404 }
+        { error: 'ユーザー更新エラー' },
+        { status: 500 }
       )
     }
 

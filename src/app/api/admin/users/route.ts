@@ -23,7 +23,11 @@ export async function GET(request: Request) {
 
     const users = await prisma.user.findMany({
       include: {
-        school: true,
+        schoolLinks: {
+          include: {
+            school: true
+          }
+        },
         _count: {
           select: {
             sessions: true

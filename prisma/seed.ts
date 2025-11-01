@@ -7,6 +7,8 @@ async function main() {
   console.log('Starting seed...')
 
   // 既存のデータをクリア（開発環境のみ）
+  await prisma.userBadge.deleteMany({})
+  await prisma.badge.deleteMany({})
   await prisma.session.deleteMany({})
   await prisma.user.deleteMany({})
   await prisma.school.deleteMany({})
@@ -41,6 +43,32 @@ async function main() {
   ])
 
   console.log('Created schools:', schools)
+
+  // バッジの作成
+  const badges = await Promise.all([
+    // Common (60%)
+    prisma.badge.create({ data: { name: 'ブロンズメダル', icon: '🥉', rarity: 'common' } }),
+    prisma.badge.create({ data: { name: '初心者バッジ', icon: '🔰', rarity: 'common' } }),
+    prisma.badge.create({ data: { name: 'コーヒーカップ', icon: '☕', rarity: 'common' } }),
+    prisma.badge.create({ data: { name: 'スタンプ', icon: '📝', rarity: 'common' } }),
+    prisma.badge.create({ data: { name: '鉛筆', icon: '✏️', rarity: 'common' } }),
+    prisma.badge.create({ data: { name: '電球', icon: '💡', rarity: 'common' } }),
+
+    // Rare (25%)
+    prisma.badge.create({ data: { name: 'シルバーメダル', icon: '🥈', rarity: 'rare' } }),
+    prisma.badge.create({ data: { name: 'ロケット', icon: '🚀', rarity: 'rare' } }),
+    prisma.badge.create({ data: { name: 'トロフィー', icon: '🏆', rarity: 'rare' } }),
+
+    // Epic (12%)
+    prisma.badge.create({ data: { name: 'ゴールドメダル', icon: '🥇', rarity: 'epic' } }),
+    prisma.badge.create({ data: { name: 'ダイヤモンド', icon: '💎', rarity: 'epic' } }),
+
+    // Legendary (3%)
+    prisma.badge.create({ data: { name: '王冠', icon: '👑', rarity: 'legendary' } }),
+    prisma.badge.create({ data: { name: '伝説の剣', icon: '⚔️', rarity: 'legendary' } }),
+  ])
+
+  console.log('Created badges:', badges.length)
 
   // パスワードのハッシュ化
   const hashedPassword = await bcrypt.hash('password123', 10)

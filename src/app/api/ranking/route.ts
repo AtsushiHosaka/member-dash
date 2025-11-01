@@ -12,17 +12,31 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
     }
 
-    const schoolId = (session.user as any).schoolId
+    const schools = (session.user as any).schools
+    const schoolIds = schools.map((school: any) => school.id)
 
     // 今週の開始と終了を取得
     const now = new Date()
     const weekStart = startOfWeek(now, { weekStartsOn: 0 }) // 日曜日始まり
     const weekEnd = endOfWeek(now, { weekStartsOn: 0 })
 
-    // 同じスクールのユーザーを取得
+    // 同じスクールに属するユーザーを取得（複数校舎対応）
     const users = await prisma.user.findMany({
-      where: { schoolId },
+      where: {
+        schoolLinks: {
+          some: {
+            schoolId: {
+              in: schoolIds
+            }
+          }
+        }
+      },
       include: {
+        schoolLinks: {
+          include: {
+            school: true
+          }
+        },
         sessions: {
           where: {
             OR: [
@@ -60,7 +74,11 @@ export async function GET(request: Request) {
       return {
         id: user.id,
         name: user.name,
-        course: user.course,
+        courses: user.courses,
+        schools: user.schoolLinks.map(link => ({
+          id: link.school.id,
+          name: link.school.name
+        })),
         avatar: user.avatar,
         totalDuration,
         isActive: isCurrentlyActive

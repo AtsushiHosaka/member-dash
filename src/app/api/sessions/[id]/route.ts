@@ -45,18 +45,55 @@ export async function PATCH(
     const duration = Math.floor(
       (endTime.getTime() - devSession.startTime.getTime()) / 1000
     )
+    const durationHours = duration / 3600
 
-    const updatedSession = await prisma.session.update({
-      where: { id },
-      data: {
-        endTime,
-        duration,
-        description,
-        isActive: false
-      }
+    // ユーザーの現在の累計学習時間を取得
+    const user = await prisma.user.findUnique({
+      where: { id: devSession.userId },
+      select: { totalStudyHours: true, gachaTickets: true }
     })
 
-    return NextResponse.json(updatedSession)
+    if (!user) {
+      return NextResponse.json(
+        { error: 'ユーザーが見つかりません' },
+        { status: 404 }
+      )
+    }
+
+    const oldTotalHours = user.totalStudyHours
+    const newTotalHours = oldTotalHours + durationHours
+
+    // 3時間ごとにガチャ券を付与
+    const oldTickets = Math.floor(oldTotalHours / 3)
+    const newTickets = Math.floor(newTotalHours / 3)
+    const ticketsToAdd = newTickets - oldTickets
+
+    // トランザクションでセッション更新とユーザー情報更新を同時に実行
+    const [updatedSession] = await prisma.$transaction([
+      prisma.session.update({
+        where: { id },
+        data: {
+          endTime,
+          duration,
+          description,
+          isActive: false
+        }
+      }),
+      prisma.user.update({
+        where: { id: devSession.userId },
+        data: {
+          totalStudyHours: newTotalHours,
+          gachaTickets: {
+            increment: ticketsToAdd
+          }
+        }
+      })
+    ])
+
+    return NextResponse.json({
+      ...updatedSession,
+      ticketsEarned: ticketsToAdd
+    })
   } catch (error) {
     console.error('Session end error:', error)
     return NextResponse.json(

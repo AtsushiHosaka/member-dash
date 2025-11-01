@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 interface ActiveMember {
   id: string
   name: string
-  course: string
+  courses: string[]
   avatar: string | null
   startTime: string
 }
@@ -65,7 +65,7 @@ export default function ActiveMembers({ members }: ActiveMembersProps) {
                 {member.name}
               </p>
               <p className="text-xs text-gray-500">
-                {member.course}
+                {member.courses.join(', ')}
               </p>
             </div>
           </div>
