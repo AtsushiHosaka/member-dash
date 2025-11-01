@@ -7,6 +7,7 @@ import Timer from '@/components/Timer'
 import SessionModal from '@/components/SessionModal'
 import Ranking from '@/components/Ranking'
 import ActiveMembers from '@/components/ActiveMembers'
+import Header from '@/components/Header'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
@@ -172,61 +173,22 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold">Member&apos;</h1>
-          <div className="flex items-center gap-4">
-            {(session.user as any)?.role === 'admin' && (
-              <>
-                <button
-                  onClick={() => router.push('/admin/users')}
-                  className="text-sm text-blue-600 hover:text-blue-800"
-                >
-                  ユーザー管理
-                </button>
-                <button
-                  onClick={() => router.push('/admin/schools')}
-                  className="text-sm text-blue-600 hover:text-blue-800"
-                >
-                  スクール管理
-                </button>
-                <button
-                  onClick={() => router.push('/admin/badges')}
-                  className="text-sm text-blue-600 hover:text-blue-800"
-                >
-                  バッジ管理
-                </button>
-              </>
-            )}
-            <button
-              onClick={() => router.push('/gacha')}
-              className="text-sm text-blue-600 hover:text-blue-800 font-semibold"
-            >
-              ガチャ (🎫 {gachaTickets}枚)
-            </button>
-            <span className="text-sm text-gray-600">
-              {session.user?.name}
-            </span>
-            <button
-              onClick={() => router.push('/account')}
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              アカウント設定
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50">
+      <Header
+        userName={session.user?.name || ''}
+        isAdmin={(session.user as any)?.role === 'admin'}
+        gachaTickets={gachaTickets}
+      />
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 py-6 md:py-8">
         <ActiveMembers members={activeMembers} />
 
-        <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-          <div className="text-center mb-8">
-            <div className="text-2xl font-bold text-gray-800 mb-4">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-10 mb-8">
+          <div className="text-center mb-10">
+            <div className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
               {formatCurrentTime(currentTime)}
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-base text-gray-500">
               {currentTime.toLocaleDateString('ja-JP', {
                 year: 'numeric',
                 month: 'long',
@@ -237,7 +199,7 @@ export default function Dashboard() {
           </div>
 
           {activeSession && (
-            <div className="mb-8">
+            <div className="mb-10">
               <Timer startTime={activeSession.startTime} isActive={true} />
             </div>
           )}
@@ -247,17 +209,19 @@ export default function Dashboard() {
               <button
                 onClick={handleStartSession}
                 disabled={loading}
-                className="px-8 py-4 bg-green-600 text-white text-lg font-bold rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition shadow-lg"
+                className="group relative px-10 py-5 bg-gradient-to-r from-green-600 to-green-500 text-white text-xl font-bold rounded-xl hover:from-green-700 hover:to-green-600 disabled:from-gray-400 disabled:to-gray-400 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:hover:scale-100"
               >
-                {loading ? '開始中...' : '開発開始'}
+                <span className="relative z-10">{loading ? '開始中...' : '開発開始'}</span>
+                <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
               </button>
             ) : (
               <button
                 onClick={handleEndSession}
                 disabled={loading}
-                className="px-8 py-4 bg-red-600 text-white text-lg font-bold rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition shadow-lg"
+                className="group relative px-10 py-5 bg-gradient-to-r from-red-600 to-red-500 text-white text-xl font-bold rounded-xl hover:from-red-700 hover:to-red-600 disabled:from-gray-400 disabled:to-gray-400 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:hover:scale-100"
               >
-                開発終了
+                <span className="relative z-10">開発終了</span>
+                <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
               </button>
             )}
           </div>
