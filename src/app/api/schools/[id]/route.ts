@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 // スクール情報を更新
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { name } = await request.json()
@@ -16,8 +16,10 @@ export async function PATCH(
       )
     }
 
+    const { id } = await params
+
     const school = await prisma.school.update({
-      where: { id: params.id },
+      where: { id },
       data: { name: name.trim() }
     })
 
@@ -34,12 +36,14 @@ export async function PATCH(
 // スクールを削除
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
     // スクールに所属するユーザーも削除される（Cascadeが設定されている場合）
     await prisma.school.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ message: 'スクールを削除しました' })

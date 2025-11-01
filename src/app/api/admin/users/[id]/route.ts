@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma'
 // ユーザーのロールを更新（管理者のみ）
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -33,8 +33,10 @@ export async function PATCH(
       )
     }
 
+    const { id } = await params
+
     const user = await prisma.user.update({
-      where: { id: params.id },
+      where: { id },
       data: { role }
     })
 
