@@ -1,6 +1,12 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+
+interface School {
+  id: string
+  name: string
+}
 
 interface RankingUser {
   id: string
@@ -14,10 +20,13 @@ interface RankingUser {
 interface RankingProps {
   users: RankingUser[]
   currentUserId: string
+  userSchools: School[]
+  onSchoolChange: (schoolId: string | null) => void
 }
 
-export default function Ranking({ users, currentUserId }: RankingProps) {
+export default function Ranking({ users, currentUserId, userSchools, onSchoolChange }: RankingProps) {
   const router = useRouter()
+  const [selectedSchool, setSelectedSchool] = useState<string>('')
 
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
@@ -29,9 +38,31 @@ export default function Ranking({ users, currentUserId }: RankingProps) {
     router.push(`/users/${userId}`)
   }
 
+  const handleSchoolChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const schoolId = e.target.value
+    setSelectedSchool(schoolId)
+    onSchoolChange(schoolId || null)
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-bold mb-4">今週のランキング</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">今週のランキング</h2>
+        {userSchools.length > 1 && (
+          <select
+            value={selectedSchool}
+            onChange={handleSchoolChange}
+            className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">全てのスクール</option>
+            {userSchools.map(school => (
+              <option key={school.id} value={school.id}>
+                {school.name}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
 
       {users.length === 0 ? (
         <p className="text-gray-500 text-center py-4">まだデータがありません</p>

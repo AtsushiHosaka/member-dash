@@ -52,14 +52,21 @@ export default function Dashboard() {
     }
   }
 
-  const fetchRanking = async () => {
+  const fetchRanking = async (schoolId?: string | null) => {
     try {
-      const response = await fetch('/api/ranking')
+      const url = schoolId
+        ? `/api/ranking?schoolId=${schoolId}`
+        : '/api/ranking'
+      const response = await fetch(url)
       const data = await response.json()
       setRanking(data)
     } catch (error) {
       console.error('Failed to fetch ranking:', error)
     }
+  }
+
+  const handleSchoolChange = (schoolId: string | null) => {
+    fetchRanking(schoolId)
   }
 
   const fetchActiveMembers = async () => {
@@ -259,6 +266,8 @@ export default function Dashboard() {
         <Ranking
           users={ranking}
           currentUserId={(session.user as any)?.id || ''}
+          userSchools={(session.user as any)?.schools || []}
+          onSchoolChange={handleSchoolChange}
         />
       </main>
 

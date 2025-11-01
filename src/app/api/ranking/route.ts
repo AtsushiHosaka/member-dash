@@ -13,7 +13,14 @@ export async function GET(request: Request) {
     }
 
     const schools = (session.user as any).schools
-    const schoolIds = schools.map((school: any) => school.id)
+    const allSchoolIds = schools.map((school: any) => school.id)
+
+    // URLからschoolIdパラメータを取得（フィルタリング用）
+    const { searchParams } = new URL(request.url)
+    const filterSchoolId = searchParams.get('schoolId')
+
+    // フィルタがあればそのスクールのみ、なければ全てのスクール
+    const schoolIds = filterSchoolId ? [filterSchoolId] : allSchoolIds
 
     // 今週の開始と終了を取得
     const now = new Date()

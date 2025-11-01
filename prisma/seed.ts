@@ -89,13 +89,17 @@ async function main() {
       }
     })
 
-    // 管理者の校舎リンクを作成
-    await prisma.userSchool.create({
-      data: {
-        userId: adminUser.id,
-        schoolId: schools[0].id // 火曜白金
-      }
-    })
+    // 管理者の校舎リンクを作成（全ての校舎に所属）
+    await Promise.all(
+      schools.map(school =>
+        prisma.userSchool.create({
+          data: {
+            userId: adminUser.id,
+            schoolId: school.id
+          }
+        })
+      )
+    )
 
     console.log('Created admin user:', adminUser.userId)
   } else {
