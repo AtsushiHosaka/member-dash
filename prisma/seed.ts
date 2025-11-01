@@ -6,109 +6,144 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('Starting seed...')
 
+  // 環境判定
+  const isDevelopment = process.env.NODE_ENV === 'development' || !process.env.DATABASE_URL?.includes('neon.tech')
+
   // 既存のデータをクリア（開発環境のみ）
-  await prisma.userBadge.deleteMany({})
-  await prisma.badge.deleteMany({})
-  await prisma.session.deleteMany({})
-  await prisma.user.deleteMany({})
-  await prisma.school.deleteMany({})
-  console.log('Cleared existing data')
+  if (isDevelopment) {
+    await prisma.userBadge.deleteMany({})
+    await prisma.badge.deleteMany({})
+    await prisma.session.deleteMany({})
+    await prisma.user.deleteMany({})
+    await prisma.school.deleteMany({})
+    console.log('Development: Cleared existing data')
+  } else {
+    console.log('Production: Skipping data deletion')
+  }
 
-  // スクールの作成
-  const schools = await Promise.all([
-    prisma.school.create({
-      data: { name: '火曜白金' }
-    }),
-    prisma.school.create({
-      data: { name: '水曜白金' }
-    }),
-    prisma.school.create({
-      data: { name: '金曜白金' }
-    }),
-    prisma.school.create({
-      data: { name: '土曜白金' }
-    }),
-    prisma.school.create({
-      data: { name: '日曜A白金' }
-    }),
-    prisma.school.create({
-      data: { name: '日曜B白金' }
-    }),
-    prisma.school.create({
-      data: { name: '日曜B秋葉原' }
-    }),
-    prisma.school.create({
-      data: { name: '日曜B池袋' }
-    })
-  ])
+  // スクールの作成（既存データがあればスキップ）
+  let schools = await prisma.school.findMany()
 
-  console.log('Created schools:', schools)
+  if (schools.length === 0) {
+    const schoolNames = ['火曜白金', '水曜白金', '金曜白金', '土曜白金', '日曜A白金', '日曜B白金', '日曜B秋葉原', '日曜B池袋']
+    schools = await Promise.all(
+      schoolNames.map(name =>
+        prisma.school.create({
+          data: { name }
+        })
+      )
+    )
+    console.log('Created schools:', schools.length)
+  } else {
+    console.log('Schools already exist:', schools.length)
+  }
 
-  // バッジの作成
-  const badges = await Promise.all([
-    // Common (60%)
-    prisma.badge.create({ data: { name: 'ブロンズメダル', icon: '🥉', rarity: 'common' } }),
-    prisma.badge.create({ data: { name: '初心者バッジ', icon: '🔰', rarity: 'common' } }),
-    prisma.badge.create({ data: { name: 'コーヒーカップ', icon: '☕', rarity: 'common' } }),
-    prisma.badge.create({ data: { name: 'スタンプ', icon: '📝', rarity: 'common' } }),
-    prisma.badge.create({ data: { name: '鉛筆', icon: '✏️', rarity: 'common' } }),
-    prisma.badge.create({ data: { name: '電球', icon: '💡', rarity: 'common' } }),
+  // バッジの作成（既存データがあればスキップ）
+  let badges = await prisma.badge.findMany()
 
-    // Rare (25%)
-    prisma.badge.create({ data: { name: 'シルバーメダル', icon: '🥈', rarity: 'rare' } }),
-    prisma.badge.create({ data: { name: 'ロケット', icon: '🚀', rarity: 'rare' } }),
-    prisma.badge.create({ data: { name: 'トロフィー', icon: '🏆', rarity: 'rare' } }),
+  if (badges.length === 0) {
+    const badgeData = [
+      // Common (60%)
+      { name: 'ブロンズメダル', icon: '🥉', rarity: 'common' },
+      { name: '初心者バッジ', icon: '🔰', rarity: 'common' },
+      { name: 'コーヒーカップ', icon: '☕', rarity: 'common' },
+      { name: 'スタンプ', icon: '📝', rarity: 'common' },
+      { name: '鉛筆', icon: '✏️', rarity: 'common' },
+      { name: '電球', icon: '💡', rarity: 'common' },
+      // Rare (25%)
+      { name: 'シルバーメダル', icon: '🥈', rarity: 'rare' },
+      { name: 'ロケット', icon: '🚀', rarity: 'rare' },
+      { name: 'トロフィー', icon: '🏆', rarity: 'rare' },
+      // Epic (12%)
+      { name: 'ゴールドメダル', icon: '🥇', rarity: 'epic' },
+      { name: 'ダイヤモンド', icon: '💎', rarity: 'epic' },
+      // Legendary (3%)
+      { name: '王冠', icon: '👑', rarity: 'legendary' },
+      { name: '伝説の剣', icon: '⚔️', rarity: 'legendary' },
+    ]
 
-    // Epic (12%)
-    prisma.badge.create({ data: { name: 'ゴールドメダル', icon: '🥇', rarity: 'epic' } }),
-    prisma.badge.create({ data: { name: 'ダイヤモンド', icon: '💎', rarity: 'epic' } }),
-
-    // Legendary (3%)
-    prisma.badge.create({ data: { name: '王冠', icon: '👑', rarity: 'legendary' } }),
-    prisma.badge.create({ data: { name: '伝説の剣', icon: '⚔️', rarity: 'legendary' } }),
-  ])
-
-  console.log('Created badges:', badges.length)
+    badges = await Promise.all(
+      badgeData.map(badge => prisma.badge.create({ data: badge }))
+    )
+    console.log('Created badges:', badges.length)
+  } else {
+    console.log('Badges already exist:', badges.length)
+  }
 
   // パスワードのハッシュ化
   const hashedPassword = await bcrypt.hash('password123', 10)
 
-  // 管理者アカウントの作成（環境変数から読み込み）
+  // 管理者アカウントの作成（環境変数から読み込み、既存なら更新）
   const adminUserId = process.env.ADMIN_USER_ID
   const adminPassword = process.env.ADMIN_PASSWORD
 
   if (adminUserId && adminPassword) {
     const hashedAdminPassword = await bcrypt.hash(adminPassword, 10)
-    const adminUser = await prisma.user.create({
-      data: {
-        userId: adminUserId,
-        name: 'LIT管理者',
-        password: hashedAdminPassword,
-        courses: ['Admin'],
-        role: 'admin'
-      }
+
+    // 既存の管理者を確認
+    let adminUser = await prisma.user.findUnique({
+      where: { userId: adminUserId },
+      include: { schoolLinks: true }
     })
 
-    // 管理者の校舎リンクを作成（全ての校舎に所属）
-    await Promise.all(
-      schools.map(school =>
-        prisma.userSchool.create({
-          data: {
-            userId: adminUser.id,
-            schoolId: school.id
-          }
-        })
-      )
-    )
+    if (!adminUser) {
+      // 新規作成
+      adminUser = await prisma.user.create({
+        data: {
+          userId: adminUserId,
+          name: 'LIT管理者',
+          password: hashedAdminPassword,
+          courses: ['Admin'],
+          role: 'admin'
+        },
+        include: { schoolLinks: true }
+      })
 
-    console.log('Created admin user:', adminUser.userId)
+      // 管理者の校舎リンクを作成（全ての校舎に所属）
+      await Promise.all(
+        schools.map(school =>
+          prisma.userSchool.create({
+            data: {
+              userId: adminUser!.id,
+              schoolId: school.id
+            }
+          })
+        )
+      )
+
+      console.log('Created admin user:', adminUser.userId)
+    } else {
+      // パスワードを更新
+      await prisma.user.update({
+        where: { userId: adminUserId },
+        data: { password: hashedAdminPassword }
+      })
+
+      // 不足している校舎リンクを追加
+      const existingSchoolIds = adminUser.schoolLinks.map(link => link.schoolId)
+      const missingSchools = schools.filter(school => !existingSchoolIds.includes(school.id))
+
+      if (missingSchools.length > 0) {
+        await Promise.all(
+          missingSchools.map(school =>
+            prisma.userSchool.create({
+              data: {
+                userId: adminUser!.id,
+                schoolId: school.id
+              }
+            })
+          )
+        )
+        console.log('Updated admin user and added missing school links:', missingSchools.length)
+      } else {
+        console.log('Admin user already exists and is up to date')
+      }
+    }
   } else {
     console.log('Skipped admin user creation (ADMIN_USER_ID or ADMIN_PASSWORD not set)')
   }
 
   // 開発環境のみテストユーザーとセッションを作成
-  const isDevelopment = process.env.NODE_ENV === 'development' || !process.env.DATABASE_URL?.includes('neon.tech')
-
   if (isDevelopment) {
     console.log('Development environment detected - creating test users...')
 
