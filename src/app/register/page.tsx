@@ -11,9 +11,13 @@ export default function RegisterPage() {
   const [name, setName] = useState('')
   const [course, setCourse] = useState('')
   const [schoolId, setSchoolId] = useState('')
+  const [avatar, setAvatar] = useState('')
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [schools, setSchools] = useState<any[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   const courses = ['iPhone', 'WebS', 'Android', 'Unity']
 
@@ -33,12 +37,65 @@ export default function RegisterPage() {
     fetchSchools()
   }, [])
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setAvatarFile(file)
+      // プレビュー用のURLを作成
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const uploadAvatar = async () => {
+    if (!avatarFile) return null
+
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', avatarFile)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'アップロードに失敗しました')
+      }
+
+      const data = await response.json()
+      return data.url
+    } catch (error) {
+      console.error('Upload error:', error)
+      throw error
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
     try {
+      // アイコン画像がある場合は先にアップロード
+      let avatarUrl = ''
+      if (avatarFile) {
+        try {
+          avatarUrl = await uploadAvatar() || ''
+        } catch (error) {
+          setError('画像のアップロードに失敗しました')
+          setLoading(false)
+          return
+        }
+      }
+
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: {
@@ -49,7 +106,8 @@ export default function RegisterPage() {
           password,
           name,
           course,
-          schoolId
+          schoolId,
+          avatar: avatarUrl
         })
       })
 
@@ -163,12 +221,35 @@ export default function RegisterPage() {
             </select>
           </div>
 
+          <div>
+            <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 mb-1">
+              アイコン画像（任意）
+            </label>
+            <input
+              id="avatar"
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+              onChange={handleAvatarChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            <p className="mt-1 text-xs text-gray-500">JPG, PNG, GIF, WebP（最大5MB）</p>
+            {avatarPreview && (
+              <div className="mt-3 flex justify-center">
+                <img
+                  src={avatarPreview}
+                  alt="プレビュー"
+                  className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+                />
+              </div>
+            )}
+          </div>
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || uploading}
             className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition"
           >
-            {loading ? '登録中...' : '登録'}
+            {uploading ? 'アップロード中...' : loading ? '登録中...' : '登録'}
           </button>
         </form>
 
