@@ -15,6 +15,7 @@ interface GachaResult {
   success: boolean
   badge: Badge
   remainingTickets: number
+  error?: string
 }
 
 export default function GachaPage() {
