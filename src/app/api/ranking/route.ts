@@ -12,7 +12,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
     }
 
-    const schools = (session.user as any).schools
+    const schools = (session.user as any).schools || []
     const allSchoolIds = schools.map((school: any) => school.id)
 
     // URLからschoolIdパラメータを取得（フィルタリング用）

@@ -11,7 +11,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
     }
 
-    const schools = (session.user as any).schools
+    const schools = (session.user as any).schools || []
     const schoolIds = schools.map((school: any) => school.id)
 
     // 同じスクールのアクティブなセッションを持つユーザーを取得（複数校舎対応）
