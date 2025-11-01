@@ -4,9 +4,9 @@ import bcrypt from 'bcrypt'
 
 export async function POST(request: Request) {
   try {
-    const { userId, password, name, course, schoolId, avatar } = await request.json()
+    const { userId, password, name, courses, schoolIds, avatar } = await request.json()
 
-    if (!userId || !password || !name || !course || !schoolId) {
+    if (!userId || !password || !name || !courses || !Array.isArray(courses) || courses.length === 0 || !schoolIds || !Array.isArray(schoolIds) || schoolIds.length === 0) {
       return NextResponse.json(
         { error: '必須項目が入力されていません' },
         { status: 400 }
@@ -31,12 +31,23 @@ export async function POST(request: Request) {
         userId,
         password: hashedPassword,
         name,
-        course,
-        schoolId,
+        courses,
         avatar: avatar || null,
         role: 'member'
       }
     })
+
+    // 校舎リンクを作成
+    await Promise.all(
+      schoolIds.map((schoolId: string) =>
+        prisma.userSchool.create({
+          data: {
+            userId: user.id,
+            schoolId
+          }
+        })
+      )
+    )
 
     return NextResponse.json(
       {

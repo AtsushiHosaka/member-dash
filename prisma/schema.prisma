@@ -11,27 +11,40 @@ datasource db {
 }
 
 model School {
-  id        String   @id @default(cuid())
-  name      String
-  users     User[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String      @id @default(cuid())
+  name       String
+  userLinks  UserSchool[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 }
 
 model User {
-  id            String    @id @default(cuid())
-  userId        String    @unique  // ユーザーID（ログイン用）
-  email         String?   // オプショナルに変更
-  name          String
-  password      String
-  course        String    // iPhone, WebS, etc.
-  avatar        String?   // Optional avatar image URL
-  role          String    @default("member")  // "admin" or "member"
-  schoolId      String
-  school        School    @relation(fields: [schoolId], references: [id])
-  sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id               String         @id @default(cuid())
+  userId           String         @unique  // ユーザーID（ログイン用）
+  name             String
+  password         String
+  courses          String[]       // 複数コース対応（配列）
+  avatar           String?        // Optional avatar image URL
+  role             String         @default("member")  // "admin" or "member"
+  schoolLinks      UserSchool[]   // 複数校舎対応（リレーション）
+  sessions         Session[]
+  gachaTickets     Int            @default(0)  // ガチャ券の枚数
+  totalStudyHours  Float          @default(0)  // 累計学習時間（時間単位）
+  userBadges       UserBadge[]    // 獲得したバッジ
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+// ユーザーと校舎の中間テーブル
+model UserSchool {
+  id        String   @id @default(cuid())
+  userId    String
+  schoolId  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, schoolId])
 }
 
 model Session {
@@ -45,4 +58,25 @@ model Session {
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+
+// ガチャから出るバッジ（景品）
+model Badge {
+  id          String      @id @default(cuid())
+  name        String      // バッジ名
+  icon        String      // アイコン（絵文字または画像URL）
+  rarity      String      // レアリティ（common, rare, epic, legendary）
+  userBadges  UserBadge[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// ユーザーが獲得したバッジ
+model UserBadge {
+  id         String   @id @default(cuid())
+  userId     String
+  badgeId    String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge      Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  obtainedAt DateTime @default(now())
 }

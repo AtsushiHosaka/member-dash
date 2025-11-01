@@ -9,8 +9,8 @@ export default function RegisterPage() {
   const [userId, setUserId] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
-  const [course, setCourse] = useState('')
-  const [schoolId, setSchoolId] = useState('')
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([])
+  const [selectedSchools, setSelectedSchools] = useState<string[]>([])
   const [avatar, setAvatar] = useState('')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
@@ -20,6 +20,22 @@ export default function RegisterPage() {
   const [uploading, setUploading] = useState(false)
 
   const courses = ['iPhone', 'WebS', 'Android', 'Unity']
+
+  const toggleCourse = (course: string) => {
+    setSelectedCourses(prev =>
+      prev.includes(course)
+        ? prev.filter(c => c !== course)
+        : [...prev, course]
+    )
+  }
+
+  const toggleSchool = (schoolId: string) => {
+    setSelectedSchools(prev =>
+      prev.includes(schoolId)
+        ? prev.filter(s => s !== schoolId)
+        : [...prev, schoolId]
+    )
+  }
 
   useEffect(() => {
     // APIからスクール一覧を取得
@@ -81,6 +97,17 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    // バリデーション
+    if (selectedCourses.length === 0) {
+      setError('少なくとも1つのコースを選択してください')
+      return
+    }
+    if (selectedSchools.length === 0) {
+      setError('少なくとも1つのスクールを選択してください')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -105,8 +132,8 @@ export default function RegisterPage() {
           userId,
           password,
           name,
-          course,
-          schoolId,
+          courses: selectedCourses,
+          schoolIds: selectedSchools,
           avatar: avatarUrl
         })
       })
@@ -182,43 +209,47 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="school" className="block text-sm font-medium text-gray-700 mb-1">
-              スクール
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              スクール（複数選択可）
             </label>
-            <select
-              id="school"
-              value={schoolId}
-              onChange={(e) => setSchoolId(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">選択してください</option>
+            <div className="space-y-2">
               {schools.map((school) => (
-                <option key={school.id} value={school.id}>
-                  {school.name}
-                </option>
+                <label key={school.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedSchools.includes(school.id)}
+                    onChange={() => toggleSchool(school.id)}
+                    className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm">{school.name}</span>
+                </label>
               ))}
-            </select>
+            </div>
+            {selectedSchools.length === 0 && (
+              <p className="mt-1 text-xs text-red-500">少なくとも1つ選択してください</p>
+            )}
           </div>
 
           <div>
-            <label htmlFor="course" className="block text-sm font-medium text-gray-700 mb-1">
-              コース
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              コース（複数選択可）
             </label>
-            <select
-              id="course"
-              value={course}
-              onChange={(e) => setCourse(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">選択してください</option>
-              {courses.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
+            <div className="space-y-2">
+              {courses.map((course) => (
+                <label key={course} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedCourses.includes(course)}
+                    onChange={() => toggleCourse(course)}
+                    className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm">{course}</span>
+                </label>
               ))}
-            </select>
+            </div>
+            {selectedCourses.length === 0 && (
+              <p className="mt-1 text-xs text-red-500">少なくとも1つ選択してください</p>
+            )}
           </div>
 
           <div>

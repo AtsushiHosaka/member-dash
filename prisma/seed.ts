@@ -56,11 +56,19 @@ async function main() {
         userId: adminUserId,
         name: 'LIT管理者',
         password: hashedAdminPassword,
-        course: 'Admin',
-        role: 'admin',
+        courses: ['Admin'],
+        role: 'admin'
+      }
+    })
+
+    // 管理者の校舎リンクを作成
+    await prisma.userSchool.create({
+      data: {
+        userId: adminUser.id,
         schoolId: schools[0].id // 火曜白金
       }
     })
+
     console.log('Created admin user:', adminUser.userId)
   } else {
     console.log('Skipped admin user creation (ADMIN_USER_ID or ADMIN_PASSWORD not set)')
@@ -73,53 +81,59 @@ async function main() {
     console.log('Development environment detected - creating test users...')
 
     // 土曜白金のユーザー作成
-    const users = await Promise.all([
-      // 開発中のメンバー1
-      prisma.user.create({
-        data: {
-          userId: 'tanaka',
-          name: '田中太郎',
-          password: hashedPassword,
-          course: 'iPhone',
-          role: 'member',
-          schoolId: schools[3].id // 土曜白金
-        }
-      }),
-      // 開発中のメンバー2
-      prisma.user.create({
-        data: {
-          userId: 'suzuki',
-          name: '鈴木花子',
-          password: hashedPassword,
-          course: 'WebS',
-          role: 'member',
-          schoolId: schools[3].id // 土曜白金
-        }
-      }),
-      // 非開発中のメンバー1
-      prisma.user.create({
-        data: {
-          userId: 'yamada',
-          name: '山田次郎',
-          password: hashedPassword,
-          course: 'Android',
-          role: 'member',
-          schoolId: schools[3].id // 土曜白金
-        }
-      }),
-      // 非開発中のメンバー2
-      prisma.user.create({
-        data: {
-          userId: 'sato',
-          name: '佐藤美咲',
-          password: hashedPassword,
-          course: 'Unity',
-          role: 'member',
-          schoolId: schools[3].id // 土曜白金
-        }
-      })
-    ])
+    const user1 = await prisma.user.create({
+      data: {
+        userId: 'tanaka',
+        name: '田中太郎',
+        password: hashedPassword,
+        courses: ['iPhone'],
+        role: 'member'
+      }
+    })
+    await prisma.userSchool.create({
+      data: { userId: user1.id, schoolId: schools[3].id }
+    })
 
+    const user2 = await prisma.user.create({
+      data: {
+        userId: 'suzuki',
+        name: '鈴木花子',
+        password: hashedPassword,
+        courses: ['WebS', 'Android'], // 複数コース例
+        role: 'member'
+      }
+    })
+    await prisma.userSchool.create({
+      data: { userId: user2.id, schoolId: schools[3].id }
+    })
+
+    const user3 = await prisma.user.create({
+      data: {
+        userId: 'yamada',
+        name: '山田次郎',
+        password: hashedPassword,
+        courses: ['Android'],
+        role: 'member'
+      }
+    })
+    await prisma.userSchool.create({
+      data: { userId: user3.id, schoolId: schools[3].id }
+    })
+
+    const user4 = await prisma.user.create({
+      data: {
+        userId: 'sato',
+        name: '佐藤美咲',
+        password: hashedPassword,
+        courses: ['Unity'],
+        role: 'member'
+      }
+    })
+    await prisma.userSchool.create({
+      data: { userId: user4.id, schoolId: schools[3].id }
+    })
+
+    const users = [user1, user2, user3, user4]
     console.log('Created test users:', users.length)
 
     // セッションデータの作成（過去1週間分）
