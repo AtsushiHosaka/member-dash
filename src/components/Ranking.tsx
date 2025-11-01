@@ -1,5 +1,7 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+
 interface RankingUser {
   id: string
   name: string
@@ -15,10 +17,16 @@ interface RankingProps {
 }
 
 export default function Ranking({ users, currentUserId }: RankingProps) {
+  const router = useRouter()
+
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
     return `${hours}時間${minutes}分`
+  }
+
+  const handleUserClick = (userId: string) => {
+    router.push(`/users/${userId}`)
   }
 
   return (
@@ -32,8 +40,9 @@ export default function Ranking({ users, currentUserId }: RankingProps) {
           {users.map((user, index) => (
             <div
               key={user.id}
-              className={`flex items-center gap-4 p-3 rounded-lg ${
-                user.id === currentUserId ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'
+              onClick={() => handleUserClick(user.id)}
+              className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition hover:shadow-md ${
+                user.id === currentUserId ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 hover:bg-gray-100'
               }`}
             >
               <div className="flex-shrink-0 w-8 text-center">

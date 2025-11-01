@@ -3,7 +3,7 @@ import './globals.css'
 import SessionProvider from '@/components/SessionProvider'
 
 export const metadata: Metadata = {
-  title: 'Dev Timer - プログラミング時間管理',
+  title: "Member' - プログラミング時間管理",
   description: 'プログラミングの開発時間を管理する打刻サービス',
 }
 

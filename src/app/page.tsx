@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Timer from '@/components/Timer'
 import SessionModal from '@/components/SessionModal'
 import Ranking from '@/components/Ranking'
+import ActiveMembers from '@/components/ActiveMembers'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
@@ -15,6 +16,7 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [ranking, setRanking] = useState([])
+  const [activeMembers, setActiveMembers] = useState([])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -34,6 +36,7 @@ export default function Dashboard() {
     if (status === 'authenticated') {
       fetchActiveSession()
       fetchRanking()
+      fetchActiveMembers()
     }
   }, [status])
 
@@ -57,6 +60,16 @@ export default function Dashboard() {
     }
   }
 
+  const fetchActiveMembers = async () => {
+    try {
+      const response = await fetch('/api/active-members')
+      const data = await response.json()
+      setActiveMembers(data)
+    } catch (error) {
+      console.error('Failed to fetch active members:', error)
+    }
+  }
+
   const handleStartSession = async () => {
     setLoading(true)
     try {
@@ -67,6 +80,7 @@ export default function Dashboard() {
       if (response.ok) {
         const data = await response.json()
         setActiveSession(data)
+        fetchActiveMembers()
       } else {
         const error = await response.json()
         alert(error.error || '開発開始に失敗しました')
@@ -99,6 +113,7 @@ export default function Dashboard() {
         setActiveSession(null)
         setIsModalOpen(false)
         fetchRanking()
+        fetchActiveMembers()
       } else {
         const error = await response.json()
         alert(error.error || '開発終了に失敗しました')
@@ -134,16 +149,26 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold">Dev Timer</h1>
+          <h1 className="text-xl font-bold">Member'</h1>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push('/admin/schools')}
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              スクール管理
-            </button>
+            {(session.user as any)?.role === 'admin' && (
+              <>
+                <button
+                  onClick={() => router.push('/admin/users')}
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  ユーザー管理
+                </button>
+                <button
+                  onClick={() => router.push('/admin/schools')}
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  スクール管理
+                </button>
+              </>
+            )}
             <span className="text-sm text-gray-600">
-              {session.user?.name}さん
+              {session.user?.name}さん（{(session.user as any)?.schoolName}）
             </span>
             <button
               onClick={() => signOut()}
@@ -156,6 +181,8 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
+        <ActiveMembers members={activeMembers} />
+
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
           <div className="text-center mb-8">
             <div className="text-2xl font-bold text-gray-800 mb-4">

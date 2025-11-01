@@ -25,14 +25,23 @@ export async function GET(request: Request) {
       include: {
         sessions: {
           where: {
-            startTime: {
-              gte: weekStart,
-              lte: weekEnd
-            },
-            isActive: false,
-            duration: {
-              not: null
-            }
+            OR: [
+              // 今週の完了済みセッション
+              {
+                startTime: {
+                  gte: weekStart,
+                  lte: weekEnd
+                },
+                isActive: false,
+                duration: {
+                  not: null
+                }
+              },
+              // アクティブなセッション
+              {
+                isActive: true
+              }
+            ]
           }
         }
       }
@@ -40,10 +49,10 @@ export async function GET(request: Request) {
 
     // ランキングデータを作成
     const ranking = users.map(user => {
-      const totalDuration = user.sessions.reduce(
-        (sum, session) => sum + (session.duration || 0),
-        0
-      )
+      // 今週の完了済みセッションの合計時間を計算
+      const totalDuration = user.sessions
+        .filter(session => !session.isActive && session.duration)
+        .reduce((sum, session) => sum + (session.duration || 0), 0)
 
       // 現在開発中かどうかをチェック
       const isCurrentlyActive = user.sessions.some(session => session.isActive)

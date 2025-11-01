@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 export default function RegisterPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [userId, setUserId] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [course, setCourse] = useState('')
@@ -45,7 +45,7 @@ export default function RegisterPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          email,
+          userId,
           password,
           name,
           course,
@@ -70,7 +70,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-8">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-6">新規登録</h1>
+        <h1 className="text-2xl font-bold text-center mb-6">Member' 新規登録</h1>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -80,6 +80,21 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
+            <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">
+              ユーザーID
+            </label>
+            <input
+              id="userId"
+              type="text"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              required
+              placeholder="半角英数字（重複不可）"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
               名前
             </label>
@@ -88,20 +103,6 @@ export default function RegisterPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              メールアドレス
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
