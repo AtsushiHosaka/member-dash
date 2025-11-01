@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma'
 // セッションを終了
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -24,8 +24,10 @@ export async function PATCH(
       )
     }
 
+    const { id } = await params
+
     const devSession = await prisma.session.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!devSession) {
@@ -45,7 +47,7 @@ export async function PATCH(
     )
 
     const updatedSession = await prisma.session.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         endTime,
         duration,
