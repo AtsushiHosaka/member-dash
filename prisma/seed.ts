@@ -25,6 +25,18 @@ async function main() {
     }),
     prisma.school.create({
       data: { name: '土曜白金' }
+    }),
+    prisma.school.create({
+      data: { name: '日曜A白金' }
+    }),
+    prisma.school.create({
+      data: { name: '日曜B白金' }
+    }),
+    prisma.school.create({
+      data: { name: '日曜B秋葉原' }
+    }),
+    prisma.school.create({
+      data: { name: '日曜B池袋' }
     })
   ])
 
@@ -32,6 +44,27 @@ async function main() {
 
   // パスワードのハッシュ化
   const hashedPassword = await bcrypt.hash('password123', 10)
+
+  // 管理者アカウントの作成（環境変数から読み込み）
+  const adminUserId = process.env.ADMIN_USER_ID
+  const adminPassword = process.env.ADMIN_PASSWORD
+
+  if (adminUserId && adminPassword) {
+    const hashedAdminPassword = await bcrypt.hash(adminPassword, 10)
+    const adminUser = await prisma.user.create({
+      data: {
+        userId: adminUserId,
+        name: 'LIT管理者',
+        password: hashedAdminPassword,
+        course: 'Admin',
+        role: 'admin',
+        schoolId: schools[0].id // 火曜白金
+      }
+    })
+    console.log('Created admin user:', adminUser.userId)
+  } else {
+    console.log('Skipped admin user creation (ADMIN_USER_ID or ADMIN_PASSWORD not set)')
+  }
 
   // 土曜白金のユーザー作成
   const users = await Promise.all([
