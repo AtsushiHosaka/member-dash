@@ -29,6 +29,18 @@ export async function POST(request: Request) {
       )
     }
 
+    // ユーザーが存在するか確認
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'ユーザーが見つかりません。再度ログインしてください。' },
+        { status: 404 }
+      )
+    }
+
     const devSession = await prisma.session.create({
       data: {
         userId,
@@ -39,6 +51,15 @@ export async function POST(request: Request) {
     return NextResponse.json(devSession, { status: 201 })
   } catch (error) {
     console.error('Session start error:', error)
+
+    // Prisma外部キー制約エラーの場合
+    if ((error as any).code === 'P2003') {
+      return NextResponse.json(
+        { error: 'ユーザーが見つかりません。再度ログインしてください。' },
+        { status: 404 }
+      )
+    }
+
     return NextResponse.json(
       { error: 'セッション開始エラー' },
       { status: 500 }

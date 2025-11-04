@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Menu, X, Users, School, Award, UserCircle, Ticket } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,6 +20,7 @@ interface HeaderProps {
 
 export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
   const closeMenu = () => setIsOpen(false)
@@ -57,7 +58,11 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
         <div className="hidden md:flex items-center gap-4">
           <button
             onClick={() => router.push('/gacha')}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition"
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition ${
+              gachaTickets === 0
+                ? 'text-gray-400 hover:bg-gray-50'
+                : 'text-amber-700 bg-gradient-to-r from-yellow-100 to-amber-100 hover:from-yellow-200 hover:to-amber-200 shadow-sm'
+            }`}
           >
             <Ticket className="w-4 h-4" />
             ガチャ ({gachaTickets}枚)
@@ -69,6 +74,7 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push('/admin/users')}
+                className={pathname === '/admin/users' ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : ''}
               >
                 <Users className="w-4 h-4 mr-2" />
                 ユーザー管理
@@ -77,6 +83,7 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push('/admin/schools')}
+                className={pathname === '/admin/schools' ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : ''}
               >
                 <School className="w-4 h-4 mr-2" />
                 スクール管理
@@ -85,6 +92,7 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push('/admin/badges')}
+                className={pathname === '/admin/badges' ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : ''}
               >
                 <Award className="w-4 h-4 mr-2" />
                 バッジ管理
@@ -96,6 +104,7 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
             variant="ghost"
             size="sm"
             onClick={() => router.push('/account')}
+            className={pathname === '/account' ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : ''}
           >
             <UserCircle className="w-4 h-4 mr-2" />
             {userName}
@@ -106,7 +115,11 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
         <div className="md:hidden flex items-center gap-2">
           <button
             onClick={() => router.push('/gacha')}
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition"
+            className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition ${
+              gachaTickets === 0
+                ? 'text-gray-400 hover:bg-gray-50'
+                : 'text-amber-700 bg-gradient-to-r from-yellow-100 to-amber-100 hover:from-yellow-200 hover:to-amber-200 shadow-sm'
+            }`}
           >
             <Ticket className="w-3.5 h-3.5" />
             {gachaTickets}
@@ -146,13 +159,21 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
 
                 <button
                   onClick={() => handleNavigation('/gacha')}
-                  className="w-full flex items-center justify-between gap-3 px-3 py-3 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                  className={`w-full flex items-center justify-between gap-3 px-3 py-3 text-sm font-medium rounded-lg transition ${
+                    gachaTickets === 0
+                      ? 'text-gray-400 hover:bg-gray-100'
+                      : 'text-amber-700 bg-gradient-to-r from-yellow-100 to-amber-100 hover:from-yellow-200 hover:to-amber-200'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <Ticket className="w-5 h-5" />
                     ガチャ
                   </div>
-                  <span className="text-xs bg-blue-100 px-2 py-1 rounded-full">
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    gachaTickets === 0
+                      ? 'bg-gray-200 text-gray-500'
+                      : 'bg-amber-200 text-amber-800'
+                  }`}>
                     {gachaTickets}枚
                   </span>
                 </button>

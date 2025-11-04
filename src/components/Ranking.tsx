@@ -22,9 +22,10 @@ interface RankingProps {
   currentUserId: string
   userSchools: School[]
   onSchoolChange: (schoolId: string | null) => void
+  loading?: boolean
 }
 
-export default function Ranking({ users, currentUserId, userSchools, onSchoolChange }: RankingProps) {
+export default function Ranking({ users, currentUserId, userSchools, onSchoolChange, loading = false }: RankingProps) {
   const router = useRouter()
   const [selectedSchool, setSelectedSchool] = useState<string>('')
 
@@ -64,7 +65,12 @@ export default function Ranking({ users, currentUserId, userSchools, onSchoolCha
         )}
       </div>
 
-      {users.length === 0 ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-gray-500">ランキング読み込み中...</p>
+        </div>
+      ) : users.length === 0 ? (
         <p className="text-gray-500 text-center py-4">まだデータがありません</p>
       ) : (
         <div className="space-y-3">

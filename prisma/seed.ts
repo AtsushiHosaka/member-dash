@@ -1,5 +1,9 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcrypt'
+import { config } from 'dotenv'
+
+// .envファイルを明示的に読み込み
+config()
 
 const prisma = new PrismaClient()
 
@@ -93,7 +97,7 @@ async function main() {
           userId: adminUserId,
           name: 'LIT管理者',
           password: hashedAdminPassword,
-          courses: ['Admin'],
+          courses: ['iPhone', 'WebS', 'WebD', 'Unity', 'AI', 'Movie'],
           role: 'admin'
         },
         include: { schoolLinks: true }
@@ -113,10 +117,13 @@ async function main() {
 
       console.log('Created admin user:', adminUser.userId)
     } else {
-      // パスワードを更新
+      // パスワードとコースを更新
       await prisma.user.update({
         where: { userId: adminUserId },
-        data: { password: hashedAdminPassword }
+        data: {
+          password: hashedAdminPassword,
+          courses: ['iPhone', 'WebS', 'WebD', 'Unity', 'AI', 'Movie']
+        }
       })
 
       // 不足している校舎リンクを追加
@@ -134,9 +141,9 @@ async function main() {
             })
           )
         )
-        console.log('Updated admin user and added missing school links:', missingSchools.length)
+        console.log('Updated admin user password/courses and added missing school links:', missingSchools.length)
       } else {
-        console.log('Admin user already exists and is up to date')
+        console.log('Updated admin user password and courses')
       }
     }
   } else {

@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import Timer from '@/components/Timer'
 import SessionModal from '@/components/SessionModal'
 import Ranking from '@/components/Ranking'
 import ActiveMembers from '@/components/ActiveMembers'
-import Header from '@/components/Header'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [ranking, setRanking] = useState([])
   const [activeMembers, setActiveMembers] = useState([])
   const [gachaTickets, setGachaTickets] = useState(0)
+  const [rankingLoading, setRankingLoading] = useState(true)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -54,6 +55,7 @@ export default function Dashboard() {
   }
 
   const fetchRanking = async (schoolId?: string | null) => {
+    setRankingLoading(true)
     try {
       const url = schoolId
         ? `/api/ranking?schoolId=${schoolId}`
@@ -63,6 +65,8 @@ export default function Dashboard() {
       setRanking(data)
     } catch (error) {
       console.error('Failed to fetch ranking:', error)
+    } finally {
+      setRankingLoading(false)
     }
   }
 
@@ -174,12 +178,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header
-        userName={session.user?.name || ''}
-        isAdmin={(session.user as any)?.role === 'admin'}
-        gachaTickets={gachaTickets}
-      />
-
       <main className="max-w-6xl mx-auto px-4 py-6 md:py-8">
         <ActiveMembers members={activeMembers} />
 
@@ -206,23 +204,39 @@ export default function Dashboard() {
 
           <div className="flex justify-center">
             {!activeSession ? (
-              <button
+              <motion.button
                 onClick={handleStartSession}
                 disabled={loading}
-                className="group relative px-10 py-5 bg-gradient-to-r from-green-600 to-green-500 text-white text-xl font-bold rounded-xl hover:from-green-700 hover:to-green-600 disabled:from-gray-400 disabled:to-gray-400 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:hover:scale-100"
+                className="group relative px-10 py-5 bg-gradient-to-r from-green-600 to-green-500 text-white text-xl font-bold rounded-xl hover:from-green-700 hover:to-green-600 disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 <span className="relative z-10">{loading ? '開始中...' : '開発開始'}</span>
-                <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
-              </button>
+                <motion.div
+                  className="absolute inset-0 rounded-xl bg-white"
+                  initial={{ opacity: 0 }}
+                  whileHover={{ opacity: 0.2 }}
+                  transition={{ duration: 0.2 }}
+                ></motion.div>
+              </motion.button>
             ) : (
-              <button
+              <motion.button
                 onClick={handleEndSession}
                 disabled={loading}
-                className="group relative px-10 py-5 bg-gradient-to-r from-red-600 to-red-500 text-white text-xl font-bold rounded-xl hover:from-red-700 hover:to-red-600 disabled:from-gray-400 disabled:to-gray-400 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:hover:scale-100"
+                className="group relative px-10 py-5 bg-gradient-to-r from-red-600 to-red-500 text-white text-xl font-bold rounded-xl hover:from-red-700 hover:to-red-600 disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 <span className="relative z-10">開発終了</span>
-                <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
-              </button>
+                <motion.div
+                  className="absolute inset-0 rounded-xl bg-white"
+                  initial={{ opacity: 0 }}
+                  whileHover={{ opacity: 0.2 }}
+                  transition={{ duration: 0.2 }}
+                ></motion.div>
+              </motion.button>
             )}
           </div>
         </div>
@@ -232,6 +246,7 @@ export default function Dashboard() {
           currentUserId={(session.user as any)?.id || ''}
           userSchools={(session.user as any)?.schools || []}
           onSchoolChange={handleSchoolChange}
+          loading={rankingLoading}
         />
       </main>
 

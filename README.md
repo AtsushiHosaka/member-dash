@@ -15,8 +15,8 @@
 
 - **フレームワーク**: Next.js 15 (App Router)
 - **認証**: NextAuth.js
-- **データベース**: SQLite (開発環境) / Prisma ORM
-- **スタイリング**: Tailwind CSS
+- **データベース**: PostgreSQL (Neon) / Prisma ORM
+- **UI**: shadcn/ui + Tailwind CSS
 - **言語**: TypeScript
 - **デプロイ**: Vercel
 
@@ -30,21 +30,40 @@ npm install
 
 ### 2. 環境変数の設定
 
-`.env` ファイルを作成し、以下の内容を設定してください：
+`.env.example` をコピーして `.env` ファイルを作成します：
+
+```bash
+cp .env.example .env
+```
+
+その後、`.env` ファイルを編集して、実際の値を設定してください：
 
 ```env
-DATABASE_URL="file:./dev.db"
+# Database (Neon PostgreSQL - development branch)
+# Neonダッシュボードから開発用ブランチの接続文字列を取得
+DATABASE_URL="postgresql://user:password@host.neon.tech/database?sslmode=require"
+
+# NextAuth
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-key-change-this-in-production"
+NEXTAUTH_SECRET="your-secret-key"  # openssl rand -base64 32 で生成
+
+# Admin Account (シード用)
+ADMIN_USER_ID="admin_lit_mentor"
+ADMIN_PASSWORD="your-secure-password"
+
+# Node Environment
+NODE_ENV="development"
 ```
 
 ### 3. データベースのセットアップ
 
-```bash
-# マイグレーション実行
-npx prisma migrate dev
+開発用Neon PostgreSQLデータベースを使用します：
 
-# 初期データの投入
+```bash
+# スキーマをデータベースにプッシュ
+npx prisma db push
+
+# 初期データの投入（管理者アカウント、スクール、テストユーザーなど）
 npm run seed
 ```
 
@@ -85,11 +104,23 @@ npm run dev
 
 1. GitHubリポジトリにプッシュ
 2. Vercelプロジェクトを作成
-3. 環境変数を設定：
-   - `DATABASE_URL`: PostgreSQLの接続文字列
-   - `NEXTAUTH_URL`: デプロイ先のURL
+3. 環境変数を設定（`.env.prod` を参照）：
+   - `DATABASE_URL`: Neon PostgreSQL本番ブランチの接続文字列
+   - `NEXTAUTH_URL`: デプロイ先のURL（例: `https://your-app.vercel.app`）
    - `NEXTAUTH_SECRET`: ランダムな秘密鍵
-4. デプロイ
+   - `ADMIN_USER_ID`: 管理者ユーザーID
+   - `ADMIN_PASSWORD`: 管理者パスワード
+   - `NODE_ENV`: `production`
+4. デプロイ後、Vercel上でシードコマンドを実行（初回のみ）
+
+### 環境の分離
+
+- **開発環境**: `.env` ファイル (Neon development branch)
+- **本番環境**: Vercel環境変数 (Neon production branch)
+
+**重要**: `.env` ファイルはGitで無視されます。本番環境の機密情報は絶対にGitHubにプッシュしないでください。
+
+本番データベースと開発データベースは完全に分離されています。
 
 ## データベーススキーマ
 

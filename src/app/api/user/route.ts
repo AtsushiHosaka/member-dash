@@ -29,7 +29,7 @@ export async function GET() {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'ユーザーが見つかりません' },
+        { error: 'ユーザーが見つかりません。再度ログインしてください。' },
         { status: 404 }
       )
     }

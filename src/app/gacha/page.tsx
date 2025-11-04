@@ -41,10 +41,16 @@ export default function GachaPage() {
   const fetchUserTickets = async () => {
     try {
       const response = await fetch('/api/user')
-      const data = await response.json()
-      setTickets(data.gachaTickets || 0)
+      if (response.ok) {
+        const data = await response.json()
+        setTickets(data.gachaTickets || 0)
+      } else {
+        // ユーザーが見つからない場合は0枚として扱う
+        setTickets(0)
+      }
     } catch (error) {
       console.error('Failed to fetch user tickets:', error)
+      setTickets(0)
     }
   }
 

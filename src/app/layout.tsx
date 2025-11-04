@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import SessionProvider from '@/components/SessionProvider'
+import GlobalHeader from '@/components/GlobalHeader'
+import PageTransition from '@/components/PageTransition'
+import { Toaster } from '@/components/ui/toaster'
 
 export const metadata: Metadata = {
   title: "Member' - プログラミング時間管理",
@@ -15,7 +18,13 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body>
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProvider>
+          <GlobalHeader />
+          <PageTransition>
+            {children}
+          </PageTransition>
+        </SessionProvider>
+        <Toaster />
       </body>
     </html>
   )
