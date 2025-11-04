@@ -19,7 +19,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
 
-  const courses = ['iPhone', 'WebS', 'Android', 'Unity']
+  const courses = ['iPhone', 'WebS', 'WebD', 'Unity', 'AI', 'Movie']
 
   const toggleCourse = (course: string) => {
     setSelectedCourses(prev =>
