@@ -12,8 +12,10 @@ export async function GET() {
     }
 
     const userId = (session.user as any).id
+    const userIdString = (session.user as any).userId
 
-    const user = await prisma.user.findUnique({
+    // まずIDで検索、見つからなければuserIdで検索（データベースリセット時の対策）
+    let user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -26,6 +28,23 @@ export async function GET() {
         totalStudyHours: true
       }
     })
+
+    // IDで見つからない場合、userIdで検索
+    if (!user && userIdString) {
+      user = await prisma.user.findUnique({
+        where: { userId: userIdString },
+        select: {
+          id: true,
+          userId: true,
+          name: true,
+          courses: true,
+          avatar: true,
+          role: true,
+          gachaTickets: true,
+          totalStudyHours: true
+        }
+      })
+    }
 
     if (!user) {
       return NextResponse.json(
