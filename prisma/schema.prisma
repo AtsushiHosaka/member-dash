@@ -48,16 +48,24 @@ model UserSchool {
 }
 
 model Session {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  startTime   DateTime  @default(now())
-  endTime     DateTime?
-  description String?
-  duration    Int?      // Duration in seconds, calculated when session ends
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startTime     DateTime  @default(now())
+  endTime       DateTime?
+  description   String?   // 旧フィールド（互換性のため残す）
+  duration      Int?      // Duration in seconds, calculated when session ends
+  isActive      Boolean   @default(true)
+
+  // 新しいフィールド
+  goal          String?   // 今日の目標
+  achievement   Int?      // 達成度（％）
+  whatIDid      String?   // やったこと
+  whatILearned  String?   // わかったこと、学んだこと
+  whatIWantToDo String?   // 次にやりたいこと
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 // ガチャから出るバッジ（景品）

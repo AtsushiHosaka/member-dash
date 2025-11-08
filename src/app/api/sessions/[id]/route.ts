@@ -15,11 +15,18 @@ export async function PATCH(
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
     }
 
-    const { description } = await request.json()
+    const { achievement, whatIDid, whatILearned, whatIWantToDo } = await request.json()
 
-    if (!description || description.trim() === '') {
+    if (!whatIDid || !whatILearned || !whatIWantToDo) {
       return NextResponse.json(
-        { error: '開発内容の入力は必須です' },
+        { error: 'すべての項目の入力は必須です' },
+        { status: 400 }
+      )
+    }
+
+    if (achievement === undefined || achievement === null || achievement < 0) {
+      return NextResponse.json(
+        { error: '達成度は0以上の数字を入力してください' },
         { status: 400 }
       )
     }
@@ -75,7 +82,10 @@ export async function PATCH(
         data: {
           endTime,
           duration,
-          description,
+          achievement,
+          whatIDid,
+          whatILearned,
+          whatIWantToDo,
           isActive: false
         }
       }),

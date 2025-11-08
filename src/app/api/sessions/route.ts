@@ -13,6 +13,8 @@ export async function POST(request: Request) {
     }
 
     const userId = (session.user as any).id
+    const body = await request.json()
+    const { goal } = body
 
     // 既にアクティブなセッションがないか確認
     const activeSession = await prisma.session.findFirst({
@@ -44,7 +46,8 @@ export async function POST(request: Request) {
     const devSession = await prisma.session.create({
       data: {
         userId,
-        isActive: true
+        isActive: true,
+        goal: goal || null
       }
     })
 

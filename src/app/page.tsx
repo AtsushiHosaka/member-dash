@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Timer from '@/components/Timer'
 import SessionModal from '@/components/SessionModal'
+import StartSessionModal from '@/components/StartSessionModal'
 import Ranking from '@/components/Ranking'
 import ActiveMembers from '@/components/ActiveMembers'
 
@@ -15,11 +16,13 @@ export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [activeSession, setActiveSession] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isStartModalOpen, setIsStartModalOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [ranking, setRanking] = useState([])
   const [activeMembers, setActiveMembers] = useState([])
   const [gachaTickets, setGachaTickets] = useState(0)
   const [rankingLoading, setRankingLoading] = useState(true)
+  const [goal, setGoal] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -94,16 +97,26 @@ export default function Dashboard() {
     }
   }
 
-  const handleStartSession = async () => {
+  const handleStartSession = () => {
+    setIsStartModalOpen(true)
+  }
+
+  const handleSubmitGoal = async (goalText: string) => {
     setLoading(true)
     try {
       const response = await fetch('/api/sessions', {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ goal: goalText })
       })
 
       if (response.ok) {
         const data = await response.json()
         setActiveSession(data)
+        setIsStartModalOpen(false)
+        setGoal('')
         fetchActiveMembers()
       } else {
         const error = await response.json()
@@ -120,7 +133,12 @@ export default function Dashboard() {
     setIsModalOpen(true)
   }
 
-  const handleSubmitDescription = async (description: string) => {
+  const handleSubmitSession = async (data: {
+    achievement: number
+    whatIDid: string
+    whatILearned: string
+    whatIWantToDo: string
+  }) => {
     if (!activeSession) return
 
     setLoading(true)
@@ -130,11 +148,11 @@ export default function Dashboard() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ description })
+        body: JSON.stringify(data)
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const responseData = await response.json()
         setActiveSession(null)
         setIsModalOpen(false)
         fetchRanking()
@@ -250,11 +268,19 @@ export default function Dashboard() {
         />
       </main>
 
+      <StartSessionModal
+        isOpen={isStartModalOpen}
+        onClose={() => setIsStartModalOpen(false)}
+        onSubmit={handleSubmitGoal}
+        loading={loading}
+      />
+
       <SessionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSubmit={handleSubmitDescription}
+        onSubmit={handleSubmitSession}
         loading={loading}
+        goal={activeSession?.goal}
       />
     </div>
   )
