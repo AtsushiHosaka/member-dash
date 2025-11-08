@@ -57,15 +57,11 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-4">
           <button
-            onClick={() => router.push('/gacha')}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition ${
-              gachaTickets === 0
-                ? 'text-gray-400 hover:bg-gray-50'
-                : 'text-amber-700 bg-gradient-to-r from-yellow-100 to-amber-100 hover:from-yellow-200 hover:to-amber-200 shadow-sm'
-            }`}
+            disabled
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed"
           >
             <Ticket className="w-4 h-4" />
-            ガチャ ({gachaTickets}枚)
+            ガチャ (実装中...)
           </button>
 
           {isAdmin && (
@@ -114,15 +110,11 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
         {/* Mobile Menu */}
         <div className="md:hidden flex items-center gap-2">
           <button
-            onClick={() => router.push('/gacha')}
-            className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition ${
-              gachaTickets === 0
-                ? 'text-gray-400 hover:bg-gray-50'
-                : 'text-amber-700 bg-gradient-to-r from-yellow-100 to-amber-100 hover:from-yellow-200 hover:to-amber-200 shadow-sm'
-            }`}
+            disabled
+            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed"
           >
             <Ticket className="w-3.5 h-3.5" />
-            {gachaTickets}
+            実装中
           </button>
 
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -158,23 +150,15 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
                 ))}
 
                 <button
-                  onClick={() => handleNavigation('/gacha')}
-                  className={`w-full flex items-center justify-between gap-3 px-3 py-3 text-sm font-medium rounded-lg transition ${
-                    gachaTickets === 0
-                      ? 'text-gray-400 hover:bg-gray-100'
-                      : 'text-amber-700 bg-gradient-to-r from-yellow-100 to-amber-100 hover:from-yellow-200 hover:to-amber-200'
-                  }`}
+                  disabled
+                  className="w-full flex items-center justify-between gap-3 px-3 py-3 text-sm font-medium rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed"
                 >
                   <div className="flex items-center gap-3">
                     <Ticket className="w-5 h-5" />
                     ガチャ
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    gachaTickets === 0
-                      ? 'bg-gray-200 text-gray-500'
-                      : 'bg-amber-200 text-amber-800'
-                  }`}>
-                    {gachaTickets}枚
+                  <span className="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-500">
+                    実装中...
                   </span>
                 </button>
               </div>

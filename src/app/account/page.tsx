@@ -6,16 +6,10 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 
 // コース一覧
-const COURSES = [
-  'iPhone',
-  'WebS',
-  'Android',
-  'Unity',
-  'AI',
-  'WebD',
-  'Game',
-  'Design'
-]
+const COURSES = ['iPhone', 'WebS', 'WebD', 'Unity', 'AI', 'Movie']
+
+// アバター絵文字一覧
+const AVATAR_EMOJIS = ['😀', '😎', '🤓', '😊', '🥳', '🤔', '😴', '🤖', '👻', '🦄']
 
 interface School {
   id: string
@@ -54,7 +48,6 @@ export default function AccountPage() {
   const [schools, setSchools] = useState<School[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
 
   // フォームの状態
   const [name, setName] = useState('')
@@ -108,34 +101,6 @@ export default function AccountPage() {
     }
   }
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setAvatar(data.url)
-      } else {
-        const error = await response.json()
-        alert(error.error || 'アップロードに失敗しました')
-      }
-    } catch (error) {
-      console.error('Upload error:', error)
-      alert('アップロードに失敗しました')
-    } finally {
-      setUploading(false)
-    }
-  }
 
   const handleCourseToggle = (course: string) => {
     setSelectedCourses(prev =>
@@ -266,42 +231,42 @@ export default function AccountPage() {
           {/* アイコン */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              アイコン
+              アイコン絵文字
             </label>
-            <div className="flex items-center gap-4">
-              <div className="relative w-20 h-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                {avatar ? (
-                  <Image
-                    src={avatar}
-                    alt="Avatar"
-                    width={80}
-                    height={80}
-                    className="object-cover"
-                  />
-                ) : (
-                  <span className="text-2xl text-gray-400">?</span>
-                )}
-              </div>
-              <div>
-                <label className="cursor-pointer inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-                  {uploading ? 'アップロード中...' : '画像を選択'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
-                    disabled={uploading}
-                    className="hidden"
-                  />
-                </label>
-                {avatar && (
+            <div className="mb-4">
+              {avatar && (
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-3xl">{avatar}</span>
+                  </div>
+                  <span className="text-sm text-gray-600">選択中: {avatar}</span>
+                </div>
+              )}
+              <div className="grid grid-cols-5 gap-2">
+                {AVATAR_EMOJIS.map((emoji) => (
                   <button
-                    onClick={() => setAvatar(null)}
-                    className="ml-2 text-sm text-red-600 hover:text-red-800"
+                    key={emoji}
+                    type="button"
+                    onClick={() => setAvatar(emoji)}
+                    className={`text-4xl p-3 rounded-lg transition hover:bg-gray-100 ${
+                      avatar === emoji
+                        ? 'bg-blue-100 ring-2 ring-blue-500'
+                        : 'bg-gray-50'
+                    }`}
                   >
-                    削除
+                    {emoji}
                   </button>
-                )}
+                ))}
               </div>
+              {avatar && (
+                <button
+                  type="button"
+                  onClick={() => setAvatar(null)}
+                  className="mt-2 text-sm text-red-600 hover:text-red-800"
+                >
+                  クリア
+                </button>
+              )}
             </div>
           </div>
 
@@ -396,29 +361,9 @@ export default function AccountPage() {
         {/* 獲得バッヂ */}
         <div className="bg-white rounded-lg shadow-md p-8 mt-8">
           <h2 className="text-2xl font-bold mb-6">獲得バッヂ</h2>
-
-          {userData.userBadges.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              まだバッヂを獲得していません
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {userData.userBadges.map((userBadge) => (
-                <div
-                  key={userBadge.id}
-                  className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition"
-                >
-                  <div className="text-5xl mb-3">{userBadge.badge.icon}</div>
-                  <div className="text-sm font-semibold text-gray-900 text-center mb-2">
-                    {userBadge.badge.name}
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${getRarityColor(userBadge.badge.rarity)}`}>
-                    {getRarityName(userBadge.badge.rarity)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="text-center py-8 text-gray-500">
+            現在実装中...
+          </div>
         </div>
       </main>
     </div>
