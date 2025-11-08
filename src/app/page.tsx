@@ -160,8 +160,8 @@ export default function Dashboard() {
         fetchUserTickets()
 
         // ガチャ券を獲得した場合は通知
-        if (data.ticketsEarned > 0) {
-          alert(`おめでとうございます！ガチャ券を${data.ticketsEarned}枚獲得しました！`)
+        if (responseData.ticketsEarned > 0) {
+          alert(`おめでとうございます！ガチャ券を${responseData.ticketsEarned}枚獲得しました！`)
         }
       } else {
         const error = await response.json()
