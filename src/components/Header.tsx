@@ -50,7 +50,7 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
             onClick={() => router.push('/')}
             className="text-2xl font-bold text-gray-800 hover:text-blue-600 transition"
           >
-            Member&apos;
+            Dash β
           </button>
         </div>
 

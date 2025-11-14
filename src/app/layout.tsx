@@ -6,7 +6,7 @@ import PageTransition from '@/components/PageTransition'
 import { Toaster } from '@/components/ui/toaster'
 
 export const metadata: Metadata = {
-  title: "Member' - プログラミング時間管理",
+  title: "Dash β - プログラミング時間管理",
   description: 'プログラミングの開発時間を管理する打刻サービス',
 }
 

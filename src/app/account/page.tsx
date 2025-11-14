@@ -214,7 +214,7 @@ export default function AccountPage() {
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold">Member&apos;</h1>
+          <h1 className="text-xl font-bold">Dash β</h1>
           <button
             onClick={() => router.push('/')}
             className="text-sm text-blue-600 hover:text-blue-800"
