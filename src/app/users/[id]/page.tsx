@@ -88,11 +88,9 @@ export default function UserDetailPage() {
   const [editLoading, setEditLoading] = useState(false)
   const [currentTime, setCurrentTime] = useState(Date.now())
   const [mentorLoading, setMentorLoading] = useState(false)
-  const [availableMentors, setAvailableMentors] = useState<MentorInfo[]>([])
 
   useEffect(() => {
     fetchUserDetail()
-    fetchAvailableMentors()
   }, [userId])
 
   // 現在開発中の場合、1秒ごとに時間を更新
@@ -117,18 +115,6 @@ export default function UserDetailPage() {
       console.error('Failed to fetch user detail:', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const fetchAvailableMentors = async () => {
-    try {
-      const response = await fetch('/api/users?role=mentor')
-      if (response.ok) {
-        const data = await response.json()
-        setAvailableMentors(data)
-      }
-    } catch (error) {
-      console.error('Failed to fetch mentors:', error)
     }
   }
 
@@ -415,57 +401,21 @@ export default function UserDetailPage() {
           </div>
 
           {/* メンター設定 (mentor/admin のみ表示) */}
-          {canManageMentor() && (
-            <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
-              <div className="text-sm font-semibold text-purple-900 mb-3">担当メンター設定</div>
-
-              {/* 現在のメンター一覧 */}
-              {user.mentorLinks && user.mentorLinks.length > 0 && (
-                <div className="mb-3 text-sm text-gray-700">
-                  現在のメンター: {user.mentorLinks.map(link => link.mentor.name).join(', ')}
+          {canManageMentor() && session?.user && (session.user as any).role === 'mentor' && (
+            <div className="mt-6">
+              <label className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg border border-purple-200 cursor-pointer hover:bg-purple-100 transition">
+                <input
+                  type="checkbox"
+                  checked={isMentorAssigned((session.user as any).id)}
+                  onChange={() => handleMentorToggle((session.user as any).id)}
+                  disabled={mentorLoading}
+                  className="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900">私のメンバーである</div>
+                  <div className="text-sm text-gray-600 mt-0.5">このユーザーを自分の担当メンバーにする</div>
                 </div>
-              )}
-
-              {/* メンター選択 (自分がmentorの場合のみ) */}
-              {session?.user && (session.user as any).role === 'mentor' && (
-                <label className="flex items-center gap-3 p-3 bg-white rounded-lg border border-purple-300 cursor-pointer hover:bg-purple-50 transition">
-                  <input
-                    type="checkbox"
-                    checked={isMentorAssigned((session.user as any).id)}
-                    onChange={() => handleMentorToggle((session.user as any).id)}
-                    disabled={mentorLoading}
-                    className="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
-                  />
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">私のメンバーである</div>
-                    <div className="text-xs text-gray-500">このユーザーを自分の担当メンバーにする</div>
-                  </div>
-                </label>
-              )}
-
-              {/* admin用: すべてのメンター選択 */}
-              {session?.user && (session.user as any).role === 'admin' && (
-                <div className="space-y-2">
-                  {availableMentors.map((mentor) => (
-                    <label
-                      key={mentor.id}
-                      className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-300 cursor-pointer hover:bg-gray-50 transition"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isMentorAssigned(mentor.id)}
-                        onChange={() => handleMentorToggle(mentor.id)}
-                        disabled={mentorLoading}
-                        className="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
-                      />
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900">{mentor.name}</div>
-                        <div className="text-xs text-gray-500">@{mentor.userId}</div>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              )}
+              </label>
             </div>
           )}
 
