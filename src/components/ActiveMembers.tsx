@@ -35,7 +35,7 @@ export default function ActiveMembers({ members }: ActiveMembersProps) {
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <h3 className="text-sm font-semibold text-gray-700 mb-4">開発中</h3>
       <div className="overflow-x-auto -mx-2 px-2">
-        <div className="flex gap-6 pb-2" style={{ minWidth: 'min-content' }}>
+        <div className="flex gap-6 py-2" style={{ minWidth: 'min-content' }}>
           {members.map((member) => (
             <div
               key={member.id}
