@@ -141,3 +141,4 @@ npm run dev
 ## ライセンス
 
 MIT
+# Schema updated with mentor role
