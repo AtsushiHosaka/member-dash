@@ -48,24 +48,55 @@ model UserSchool {
 }
 
 model Session {
-  id            String    @id @default(cuid())
+  id            String               @id @default(cuid())
   userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  startTime     DateTime  @default(now())
+  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startTime     DateTime             @default(now())
   endTime       DateTime?
-  description   String?   // 旧フィールド（互換性のため残す）
-  duration      Int?      // Duration in seconds, calculated when session ends
-  isActive      Boolean   @default(true)
+  description   String?              // 旧フィールド（互換性のため残す）
+  duration      Int?                 // Duration in seconds, calculated when session ends
+  isActive      Boolean              @default(true)
 
   // 新しいフィールド
-  goal          String?   // 今日の目標
-  achievement   Int?      // 達成度（％）
-  whatIDid      String?   // やったこと
-  whatILearned  String?   // わかったこと、学んだこと
-  whatIWantToDo String?   // 次にやりたいこと
+  goal          String?              // 今日の目標
+  achievement   Int?                 // 達成度（％）
+  whatIDid      String?              // やったこと
+  whatILearned  String?              // わかったこと、学んだこと
+  whatIWantToDo String?              // 次にやりたいこと
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  editHistory   SessionEditHistory[] // 編集履歴
+
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+}
+
+// セッション編集履歴
+model SessionEditHistory {
+  id            String   @id @default(cuid())
+  sessionId     String
+  session       Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  editedBy      String   // 編集したユーザーのID
+  editedAt      DateTime @default(now())
+
+  // 編集前の値
+  oldStartTime     DateTime?
+  oldEndTime       DateTime?
+  oldDuration      Int?
+  oldGoal          String?
+  oldAchievement   Int?
+  oldWhatIDid      String?
+  oldWhatILearned  String?
+  oldWhatIWantToDo String?
+
+  // 編集後の値
+  newStartTime     DateTime?
+  newEndTime       DateTime?
+  newDuration      Int?
+  newGoal          String?
+  newAchievement   Int?
+  newWhatIDid      String?
+  newWhatILearned  String?
+  newWhatIWantToDo String?
 }
 
 // ガチャから出るバッジ（景品）

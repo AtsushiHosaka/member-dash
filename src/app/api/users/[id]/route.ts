@@ -19,6 +19,13 @@ export async function GET(
           }
         },
         sessions: {
+          include: {
+            _count: {
+              select: {
+                editHistory: true
+              }
+            }
+          },
           orderBy: {
             startTime: 'desc'
           }

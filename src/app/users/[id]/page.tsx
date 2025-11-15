@@ -7,6 +7,8 @@ import { useSession } from 'next-auth/react'
 import { useToast } from '@/hooks/use-toast'
 import SessionDetailModal from '@/components/SessionDetailModal'
 import ManualSessionModal from '@/components/ManualSessionModal'
+import SessionEditModal from '@/components/SessionEditModal'
+import SessionHistoryModal from '@/components/SessionHistoryModal'
 
 interface UserSession {
   id: string
@@ -20,6 +22,9 @@ interface UserSession {
   whatIDid: string | null
   whatILearned: string | null
   whatIWantToDo: string | null
+  _count?: {
+    editHistory: number
+  }
 }
 
 interface Badge {
@@ -62,8 +67,11 @@ export default function UserDetailPage() {
   const [loading, setLoading] = useState(true)
   const [selectedSession, setSelectedSession] = useState<UserSession | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
   const [isManualModalOpen, setIsManualModalOpen] = useState(false)
   const [manualLoading, setManualLoading] = useState(false)
+  const [editLoading, setEditLoading] = useState(false)
   const [currentTime, setCurrentTime] = useState(Date.now())
 
   useEffect(() => {
@@ -196,6 +204,66 @@ export default function UserDetailPage() {
     const currentUserRole = (session.user as any).role
     const currentUserId = (session.user as any).id
     return currentUserRole === 'admin' || currentUserId === userId
+  }
+
+  const canEditSession = () => {
+    if (!session?.user) return false
+    const currentUserRole = (session.user as any).role
+    const currentUserId = (session.user as any).id
+    return currentUserRole === 'admin' || currentUserId === userId
+  }
+
+  const handleEditSession = () => {
+    setIsDetailModalOpen(false)
+    setIsEditModalOpen(true)
+  }
+
+  const handleViewHistory = () => {
+    setIsDetailModalOpen(false)
+    setIsHistoryModalOpen(true)
+  }
+
+  const handleEditSubmit = async (data: {
+    startTime: string
+    endTime: string
+    goal: string
+    achievement: number
+    whatIDid: string
+    whatILearned: string
+    whatIWantToDo: string
+  }) => {
+    if (!selectedSession) return
+
+    setEditLoading(true)
+    try {
+      const response = await fetch(`/api/sessions/${selectedSession.id}/edit`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+
+      const responseData = await response.json()
+
+      if (!response.ok) {
+        throw new Error(responseData.error || 'セッション編集に失敗しました')
+      }
+
+      toast({
+        title: "編集完了",
+        description: "開発記録を更新しました",
+      })
+
+      setIsEditModalOpen(false)
+      fetchUserDetail()
+    } catch (error: any) {
+      toast({
+        title: "編集失敗",
+        description: error.message || '開発記録の編集に失敗しました',
+        variant: "destructive",
+      })
+    } finally {
+      setEditLoading(false)
+    }
   }
 
   if (loading) {
@@ -351,8 +419,15 @@ export default function UserDetailPage() {
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
-                      <div className="font-semibold text-gray-900">
-                        {session.whatIDid || session.description || '（説明なし）'}
+                      <div className="flex items-center gap-2">
+                        <div className="font-semibold text-gray-900">
+                          {session.whatIDid || session.description || '（説明なし）'}
+                        </div>
+                        {session._count && session._count.editHistory > 0 && (
+                          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
+                            (編集済み)
+                          </span>
+                        )}
                       </div>
                       <div className="text-sm text-gray-500 mt-1">
                         {formatDateTime(session.startTime)}
@@ -380,7 +455,25 @@ export default function UserDetailPage() {
       <SessionDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
+        onEdit={canEditSession() ? handleEditSession : undefined}
+        onViewHistory={selectedSession?._count && selectedSession._count.editHistory > 0 ? handleViewHistory : undefined}
         session={selectedSession}
+        hasEditHistory={selectedSession?._count ? selectedSession._count.editHistory > 0 : false}
+        canEdit={canEditSession()}
+      />
+
+      <SessionEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSubmit={handleEditSubmit}
+        session={selectedSession}
+        loading={editLoading}
+      />
+
+      <SessionHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        sessionId={selectedSession?.id || null}
       />
 
       <ManualSessionModal

@@ -3,7 +3,10 @@
 interface SessionDetailModalProps {
   isOpen: boolean
   onClose: () => void
+  onEdit?: () => void
+  onViewHistory?: () => void
   session: {
+    id?: string
     startTime: string
     endTime: string | null
     duration: number | null
@@ -13,9 +16,19 @@ interface SessionDetailModalProps {
     whatILearned: string | null
     whatIWantToDo: string | null
   } | null
+  hasEditHistory?: boolean
+  canEdit?: boolean
 }
 
-export default function SessionDetailModal({ isOpen, onClose, session }: SessionDetailModalProps) {
+export default function SessionDetailModal({
+  isOpen,
+  onClose,
+  onEdit,
+  onViewHistory,
+  session,
+  hasEditHistory = false,
+  canEdit = false
+}: SessionDetailModalProps) {
   if (!isOpen || !session) return null
 
   const formatDateTime = (dateString: string) => {
@@ -39,12 +52,25 @@ export default function SessionDetailModal({ isOpen, onClose, session }: Session
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold">開発記録の詳細</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
-          >
-            ×
-          </button>
+          <div className="flex items-center gap-2">
+            {hasEditHistory && onViewHistory && (
+              <button
+                onClick={onViewHistory}
+                className="p-2 text-gray-600 hover:text-blue-600 transition"
+                title="編集履歴を見る"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+            >
+              ×
+            </button>
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -139,10 +165,18 @@ export default function SessionDetailModal({ isOpen, onClose, session }: Session
           )}
         </div>
 
-        <div className="mt-6">
+        <div className="mt-6 flex gap-3">
+          {canEdit && onEdit && (
+            <button
+              onClick={onEdit}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            >
+              編集
+            </button>
+          )}
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition"
+            className={`${canEdit ? 'flex-1' : 'w-full'} px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition`}
           >
             閉じる
           </button>
