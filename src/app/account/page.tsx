@@ -55,6 +55,12 @@ export default function AccountPage() {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([])
   const [selectedSchools, setSelectedSchools] = useState<string[]>([])
 
+  // パスワード変更の状態
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [changingPassword, setChangingPassword] = useState(false)
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login')
@@ -168,6 +174,53 @@ export default function AccountPage() {
     signOut()
   }
 
+  const handlePasswordChange = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      alert('すべてのパスワードフィールドを入力してください')
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      alert('新しいパスワードと確認用パスワードが一致しません')
+      return
+    }
+
+    if (newPassword.length < 6) {
+      alert('新しいパスワードは6文字以上にしてください')
+      return
+    }
+
+    setChangingPassword(true)
+    try {
+      const response = await fetch('/api/users/me/password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert('パスワードを変更しました')
+        setCurrentPassword('')
+        setNewPassword('')
+        setConfirmPassword('')
+      } else {
+        alert(data.error || 'パスワード変更に失敗しました')
+      }
+    } catch (error) {
+      console.error('Password change error:', error)
+      alert('パスワード変更に失敗しました')
+    } finally {
+      setChangingPassword(false)
+    }
+  }
+
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
       case 'common':
@@ -212,19 +265,15 @@ export default function AccountPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold">Dash β</h1>
+      <main className="max-w-2xl mx-auto px-4 py-8">
+        <div className="mb-6">
           <button
             onClick={() => router.push('/')}
             className="text-sm text-blue-600 hover:text-blue-800"
           >
-            ホームに戻る
+            ← ホームに戻る
           </button>
         </div>
-      </header>
-
-      <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-md p-8">
           <h2 className="text-2xl font-bold mb-6">アカウント設定</h2>
 
@@ -347,15 +396,71 @@ export default function AccountPage() {
             </button>
           </div>
 
-          {/* ログアウト */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
+        </div>
+
+        {/* パスワード変更 */}
+        <div className="bg-white rounded-lg shadow-md p-8 mt-8">
+          <h2 className="text-2xl font-bold mb-6">パスワード変更</h2>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                現在のパスワード <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="現在のパスワードを入力"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                新しいパスワード <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="新しいパスワードを入力（6文字以上）"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                新しいパスワード（確認） <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="新しいパスワードを再入力"
+              />
+            </div>
+
             <button
-              onClick={handleLogout}
-              className="w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition"
+              onClick={handlePasswordChange}
+              disabled={changingPassword}
+              className="w-full px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
             >
-              ログアウト
+              {changingPassword ? 'パスワード変更中...' : 'パスワードを変更'}
             </button>
           </div>
+        </div>
+
+        {/* ログアウト */}
+        <div className="bg-white rounded-lg shadow-md p-8 mt-8">
+          <h2 className="text-2xl font-bold mb-6">ログアウト</h2>
+          <button
+            onClick={handleLogout}
+            className="w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition"
+          >
+            ログアウト
+          </button>
         </div>
 
         {/* 獲得バッヂ */}
