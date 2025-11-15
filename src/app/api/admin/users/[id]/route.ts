@@ -28,9 +28,9 @@ export async function PATCH(
     const { name, courses, schoolIds, role } = body
 
     // バリデーション
-    if (role && role !== 'admin' && role !== 'member') {
+    if (role && role !== 'admin' && role !== 'mentor' && role !== 'member') {
       return NextResponse.json(
-        { error: 'ロールはadminまたはmemberである必要があります' },
+        { error: 'ロールはadmin、mentor、またはmemberである必要があります' },
         { status: 400 }
       )
     }

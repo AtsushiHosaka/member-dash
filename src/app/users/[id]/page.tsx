@@ -40,12 +40,21 @@ interface UserBadge {
   obtainedAt: string
 }
 
+interface MentorInfo {
+  id: string
+  userId: string
+  name: string
+}
+
 interface UserDetail {
   id: string
   userId: string
   name: string
   courses: string[]
   avatar: string | null
+  role: string
+  mentorId: string | null
+  mentor: MentorInfo | null
   schoolLinks: Array<{
     school: {
       id: string
@@ -73,9 +82,12 @@ export default function UserDetailPage() {
   const [manualLoading, setManualLoading] = useState(false)
   const [editLoading, setEditLoading] = useState(false)
   const [currentTime, setCurrentTime] = useState(Date.now())
+  const [mentorLoading, setMentorLoading] = useState(false)
+  const [availableMentors, setAvailableMentors] = useState<MentorInfo[]>([])
 
   useEffect(() => {
     fetchUserDetail()
+    fetchAvailableMentors()
   }, [userId])
 
   // 現在開発中の場合、1秒ごとに時間を更新
@@ -100,6 +112,49 @@ export default function UserDetailPage() {
       console.error('Failed to fetch user detail:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchAvailableMentors = async () => {
+    try {
+      const response = await fetch('/api/users?role=mentor')
+      if (response.ok) {
+        const data = await response.json()
+        setAvailableMentors(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch mentors:', error)
+    }
+  }
+
+  const handleMentorChange = async (newMentorId: string | null) => {
+    setMentorLoading(true)
+    try {
+      const response = await fetch(`/api/users/${userId}/mentor`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mentorId: newMentorId })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'メンター設定に失敗しました')
+      }
+
+      toast({
+        title: "設定完了",
+        description: newMentorId ? "メンターを設定しました" : "メンター設定を解除しました",
+      })
+
+      fetchUserDetail()
+    } catch (error: any) {
+      toast({
+        title: "設定失敗",
+        description: error.message || 'メンター設定に失敗しました',
+        variant: "destructive",
+      })
+    } finally {
+      setMentorLoading(false)
     }
   }
 
@@ -211,6 +266,19 @@ export default function UserDetailPage() {
     const currentUserRole = (session.user as any).role
     const currentUserId = (session.user as any).id
     return currentUserRole === 'admin' || currentUserId === userId
+  }
+
+  const canManageMentor = () => {
+    if (!session?.user) return false
+    const currentUserRole = (session.user as any).role
+    const currentUserId = (session.user as any).id
+    // adminは全員のメンターを設定可能、mentorは自分のメンバーのみ設定可能
+    if (currentUserRole === 'admin') return true
+    if (currentUserRole === 'mentor') {
+      // 自分が担当するメンバーとして追加/削除する場合
+      return true
+    }
+    return false
   }
 
   const handleEditSession = () => {
@@ -330,6 +398,38 @@ export default function UserDetailPage() {
               </p>
             </div>
           </div>
+
+          {/* メンター設定 (mentor/admin のみ表示) */}
+          {canManageMentor() && (
+            <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="text-sm font-semibold text-purple-900 mb-3">担当メンター設定</div>
+              <div className="flex items-center gap-3">
+                <select
+                  value={user.mentorId || ''}
+                  onChange={(e) => handleMentorChange(e.target.value || null)}
+                  disabled={mentorLoading}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100"
+                >
+                  <option value="">メンターなし</option>
+                  {availableMentors.map((mentor) => (
+                    <option key={mentor.id} value={mentor.id}>
+                      {mentor.name} (@{mentor.userId})
+                    </option>
+                  ))}
+                  {session?.user && (session.user as any).role === 'mentor' && (
+                    <option value={(session.user as any).id}>
+                      自分 ({(session.user as any).name})
+                    </option>
+                  )}
+                </select>
+                {user.mentor && (
+                  <div className="text-sm text-gray-600">
+                    現在: {user.mentor.name}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* 現在開発中の目標 */}
           {activeSession && activeSession.goal && (

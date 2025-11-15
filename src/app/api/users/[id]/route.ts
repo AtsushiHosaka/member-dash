@@ -18,6 +18,13 @@ export async function GET(
             school: true
           }
         },
+        mentor: {
+          select: {
+            id: true,
+            userId: true,
+            name: true
+          }
+        },
         sessions: {
           include: {
             _count: {

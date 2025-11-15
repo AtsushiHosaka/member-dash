@@ -170,7 +170,14 @@ export default function UsersAdminPage() {
   }
 
   const getRoleBadgeColor = (role: string) => {
-    return role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
+    switch (role) {
+      case 'admin':
+        return 'bg-purple-100 text-purple-800'
+      case 'mentor':
+        return 'bg-blue-100 text-blue-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
   }
 
   return (
@@ -301,6 +308,7 @@ export default function UsersAdminPage() {
                               className="px-3 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                               <option value="member">member</option>
+                              <option value="mentor">mentor</option>
                               <option value="admin">admin</option>
                             </select>
                           ) : (
