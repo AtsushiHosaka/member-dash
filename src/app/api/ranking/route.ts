@@ -71,12 +71,21 @@ export async function GET(request: Request) {
     // ランキングデータを作成
     const ranking = users.map(user => {
       // 今週の完了済みセッションの合計時間を計算
-      const totalDuration = user.sessions
+      const completedDuration = user.sessions
         .filter(session => !session.isActive && session.duration)
         .reduce((sum, session) => sum + (session.duration || 0), 0)
 
+      // 現在開発中のセッションの時間を計算
+      const activeSession = user.sessions.find(session => session.isActive)
+      const activeDuration = activeSession
+        ? Math.floor((Date.now() - new Date(activeSession.startTime).getTime()) / 1000)
+        : 0
+
+      // 合計時間（完了 + 現在開発中）
+      const totalDuration = completedDuration + activeDuration
+
       // 現在開発中かどうかをチェック
-      const isCurrentlyActive = user.sessions.some(session => session.isActive)
+      const isCurrentlyActive = !!activeSession
 
       return {
         id: user.id,

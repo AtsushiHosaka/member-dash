@@ -64,10 +64,22 @@ export default function UserDetailPage() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [isManualModalOpen, setIsManualModalOpen] = useState(false)
   const [manualLoading, setManualLoading] = useState(false)
+  const [currentTime, setCurrentTime] = useState(Date.now())
 
   useEffect(() => {
     fetchUserDetail()
   }, [userId])
+
+  // 現在開発中の場合、1秒ごとに時間を更新
+  useEffect(() => {
+    const activeSession = user?.sessions.find(s => s.isActive)
+    if (activeSession) {
+      const interval = setInterval(() => {
+        setCurrentTime(Date.now())
+      }, 1000)
+      return () => clearInterval(interval)
+    }
+  }, [user])
 
   const fetchUserDetail = async () => {
     try {
@@ -207,7 +219,16 @@ export default function UserDetailPage() {
     .filter(s => !s.isActive && s.duration)
     .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
 
-  const totalDuration = completedSessions.reduce((sum, s) => sum + (s.duration || 0), 0)
+  // 完了済みセッションの合計時間
+  const completedDuration = completedSessions.reduce((sum, s) => sum + (s.duration || 0), 0)
+
+  // 現在開発中のセッションの時間を計算（currentTimeを使用してリアルタイム更新）
+  const activeDuration = activeSession
+    ? Math.floor((currentTime - new Date(activeSession.startTime).getTime()) / 1000)
+    : 0
+
+  // 合計時間（完了 + 現在開発中）
+  const totalDuration = completedDuration + activeDuration
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
