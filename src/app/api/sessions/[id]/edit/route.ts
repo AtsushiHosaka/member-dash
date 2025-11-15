@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 // セッションを編集
-export async function PATCH(
+export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -19,6 +19,25 @@ export async function PATCH(
     const currentUserRole = (session.user as any).role
 
     const { id } = await params
+
+    // セッションを取得して所有者を確認
+    const existingSession = await prisma.session.findUnique({
+      where: { id },
+      select: { userId: true, startTime: true, endTime: true, duration: true, goal: true, achievement: true, whatIDid: true, whatILearned: true, whatIWantToDo: true }
+    })
+
+    if (!existingSession) {
+      return NextResponse.json(
+        { error: 'セッションが見つかりません' },
+        { status: 404 }
+      )
+    }
+
+    // 権限チェック: 管理者またはセッションの所有者のみ
+    if (currentUserRole !== 'admin' && currentUserId !== existingSession.userId) {
+      return NextResponse.json({ error: '権限がありません' }, { status: 403 })
+    }
+
     const body = await request.json()
     const {
       startTime,
@@ -29,23 +48,6 @@ export async function PATCH(
       whatILearned,
       whatIWantToDo
     } = body
-
-    // 既存のセッションを取得
-    const existingSession = await prisma.session.findUnique({
-      where: { id }
-    })
-
-    if (!existingSession) {
-      return NextResponse.json(
-        { error: 'セッションが見つかりません' },
-        { status: 404 }
-      )
-    }
-
-    // 権限チェック: 管理者または本人のみ
-    if (currentUserRole !== 'admin' && existingSession.userId !== currentUserId) {
-      return NextResponse.json({ error: '権限がありません' }, { status: 403 })
-    }
 
     // バリデーション
     if (!startTime || !endTime) {
@@ -79,8 +81,33 @@ export async function PATCH(
       )
     }
 
-    // 新しい期間を計算
+    // 新しい期間（秒）を計算
     const newDuration = Math.floor((end.getTime() - start.getTime()) / 1000)
+    const oldDuration = existingSession.duration || 0
+
+    // 期間の差分を計算（学習時間調整用）
+    const durationDiff = (newDuration - oldDuration) / 3600 // 時間単位
+
+    // ユーザーの現在の累計学習時間を取得
+    const user = await prisma.user.findUnique({
+      where: { id: existingSession.userId },
+      select: { totalStudyHours: true, gachaTickets: true }
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'ユーザーが見つかりません' },
+        { status: 404 }
+      )
+    }
+
+    const oldTotalHours = user.totalStudyHours
+    const newTotalHours = oldTotalHours + durationDiff
+
+    // 3時間ごとにガチャ券を付与（変更分のみ）
+    const oldTickets = Math.floor(oldTotalHours / 3)
+    const newTickets = Math.floor(newTotalHours / 3)
+    const ticketsToAdd = newTickets - oldTickets
 
     // トランザクションで編集履歴を保存してからセッションを更新
     const [updatedSession] = await prisma.$transaction([
@@ -101,7 +128,6 @@ export async function PATCH(
         data: {
           sessionId: id,
           editedBy: currentUserId,
-          // 編集前の値
           oldStartTime: existingSession.startTime,
           oldEndTime: existingSession.endTime,
           oldDuration: existingSession.duration,
@@ -110,7 +136,6 @@ export async function PATCH(
           oldWhatIDid: existingSession.whatIDid,
           oldWhatILearned: existingSession.whatILearned,
           oldWhatIWantToDo: existingSession.whatIWantToDo,
-          // 編集後の値
           newStartTime: start,
           newEndTime: end,
           newDuration,
@@ -120,10 +145,22 @@ export async function PATCH(
           newWhatILearned: whatILearned,
           newWhatIWantToDo: whatIWantToDo
         }
+      }),
+      prisma.user.update({
+        where: { id: existingSession.userId },
+        data: {
+          totalStudyHours: newTotalHours,
+          gachaTickets: {
+            increment: ticketsToAdd
+          }
+        }
       })
     ])
 
-    return NextResponse.json(updatedSession)
+    return NextResponse.json({
+      ...updatedSession,
+      ticketsChanged: ticketsToAdd
+    })
   } catch (error) {
     console.error('Session edit error:', error)
     return NextResponse.json(
