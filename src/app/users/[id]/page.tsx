@@ -202,6 +202,7 @@ export default function UserDetailPage() {
     )
   }
 
+  const activeSession = user.sessions.find(s => s.isActive)
   const completedSessions = user.sessions
     .filter(s => !s.isActive && s.duration)
     .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
@@ -240,6 +241,23 @@ export default function UserDetailPage() {
               </p>
             </div>
           </div>
+
+          {/* 現在開発中の目標 */}
+          {activeSession && activeSession.goal && (
+            <div className="mt-6 p-4 bg-green-50 rounded-lg border-2 border-green-200">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="text-sm font-semibold text-green-700">現在開発中</div>
+              </div>
+              <div className="text-sm text-gray-600 mb-1">今日の目標</div>
+              <div className="text-lg font-medium text-gray-900">
+                {activeSession.goal}
+              </div>
+              <div className="text-xs text-gray-500 mt-2">
+                開始: {formatDateTime(activeSession.startTime)}
+              </div>
+            </div>
+          )}
 
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <div className="text-sm text-gray-600">総開発時間</div>
