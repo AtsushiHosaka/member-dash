@@ -25,7 +25,10 @@ model User {
   password         String
   courses          String[]       // 複数コース対応（配列）
   avatar           String?        // Optional avatar image URL
-  role             String         @default("member")  // "admin" or "member"
+  role             String         @default("member")  // "admin", "mentor", or "member"
+  mentorId         String?        // メンターのID（memberの場合）
+  mentor           User?          @relation("MentorToMembers", fields: [mentorId], references: [id], onDelete: SetNull)
+  members          User[]         @relation("MentorToMembers") // メンターの場合、担当メンバー
   schoolLinks      UserSchool[]   // 複数校舎対応（リレーション）
   sessions         Session[]
   gachaTickets     Int            @default(0)  // ガチャ券の枚数

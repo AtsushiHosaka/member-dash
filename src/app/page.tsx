@@ -9,6 +9,7 @@ import SessionModal from '@/components/SessionModal'
 import StartSessionModal from '@/components/StartSessionModal'
 import Ranking from '@/components/Ranking'
 import ActiveMembers from '@/components/ActiveMembers'
+import MentorMembers from '@/components/MentorMembers'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
@@ -20,9 +21,11 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false)
   const [ranking, setRanking] = useState([])
   const [activeMembers, setActiveMembers] = useState([])
+  const [mentorMembers, setMentorMembers] = useState([])
   const [gachaTickets, setGachaTickets] = useState(0)
   const [rankingLoading, setRankingLoading] = useState(true)
   const [goal, setGoal] = useState('')
+  const [userRole, setUserRole] = useState<string>('')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -40,12 +43,19 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (status === 'authenticated') {
+      const role = (session?.user as any)?.role || ''
+      setUserRole(role)
       fetchActiveSession()
       fetchRanking()
       fetchActiveMembers()
       fetchUserTickets()
+
+      // メンターまたは管理者の場合、担当メンバーを取得
+      if (role === 'mentor' || role === 'admin') {
+        fetchMentorMembers()
+      }
     }
-  }, [status])
+  }, [status, session])
 
   const fetchActiveSession = async () => {
     try {
@@ -94,6 +104,18 @@ export default function Dashboard() {
       setGachaTickets(data.gachaTickets || 0)
     } catch (error) {
       console.error('Failed to fetch user tickets:', error)
+    }
+  }
+
+  const fetchMentorMembers = async () => {
+    try {
+      const response = await fetch('/api/mentor/members')
+      if (response.ok) {
+        const data = await response.json()
+        setMentorMembers(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch mentor members:', error)
     }
   }
 
@@ -158,6 +180,11 @@ export default function Dashboard() {
         fetchRanking()
         fetchActiveMembers()
         fetchUserTickets()
+
+        // メンターの場合、担当メンバーも更新
+        if (userRole === 'mentor' || userRole === 'admin') {
+          fetchMentorMembers()
+        }
 
         // ガチャ券を獲得した場合は通知
         if (responseData.ticketsEarned > 0) {
@@ -258,6 +285,11 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+
+        {/* メンター向け担当メンバー一覧 */}
+        {(userRole === 'mentor' || userRole === 'admin') && (
+          <MentorMembers members={mentorMembers} />
+        )}
 
         <Ranking
           users={ranking}
