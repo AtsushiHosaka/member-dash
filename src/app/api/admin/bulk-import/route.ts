@@ -104,7 +104,7 @@ export async function POST(request: Request) {
             password: hashedPassword,
             name: user.name,
             courses: user.courses,
-            userSchools: {
+            schoolLinks: {
               create: [
                 {
                   schoolId: schoolId
