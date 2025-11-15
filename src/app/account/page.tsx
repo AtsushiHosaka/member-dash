@@ -266,14 +266,6 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen bg-gray-100">
       <main className="max-w-2xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <button
-            onClick={() => router.push('/')}
-            className="text-sm text-blue-600 hover:text-blue-800"
-          >
-            ← ホームに戻る
-          </button>
-        </div>
         <div className="bg-white rounded-lg shadow-md p-8">
           <h2 className="text-2xl font-bold mb-6">アカウント設定</h2>
 
@@ -398,6 +390,14 @@ export default function AccountPage() {
 
         </div>
 
+        {/* 獲得バッヂ */}
+        <div className="bg-white rounded-lg shadow-md p-8 mt-8">
+          <h2 className="text-2xl font-bold mb-6">獲得バッヂ</h2>
+          <div className="text-center py-8 text-gray-500">
+            現在実装中...
+          </div>
+        </div>
+
         {/* パスワード変更 */}
         <div className="bg-white rounded-lg shadow-md p-8 mt-8">
           <h2 className="text-2xl font-bold mb-6">パスワード変更</h2>
@@ -461,14 +461,6 @@ export default function AccountPage() {
           >
             ログアウト
           </button>
-        </div>
-
-        {/* 獲得バッヂ */}
-        <div className="bg-white rounded-lg shadow-md p-8 mt-8">
-          <h2 className="text-2xl font-bold mb-6">獲得バッヂ</h2>
-          <div className="text-center py-8 text-gray-500">
-            現在実装中...
-          </div>
         </div>
       </main>
     </div>
