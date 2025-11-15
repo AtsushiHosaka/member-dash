@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useToast } from '@/hooks/use-toast'
+import BulkImportModal from '@/components/BulkImportModal'
 
 interface School {
   id: string
@@ -46,6 +47,7 @@ export default function UsersAdminPage() {
   const [loading, setLoading] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingData, setEditingData] = useState<EditingUser | null>(null)
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -185,8 +187,14 @@ export default function UsersAdminPage() {
         </div>
 
         <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-lg font-semibold">全ユーザー一覧</h2>
+            <button
+              onClick={() => setIsBulkImportOpen(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+            >
+              + 一括追加
+            </button>
           </div>
 
           {users.length === 0 ? (
@@ -338,6 +346,18 @@ export default function UsersAdminPage() {
           )}
         </div>
       </div>
+
+      <BulkImportModal
+        isOpen={isBulkImportOpen}
+        onClose={() => setIsBulkImportOpen(false)}
+        onSuccess={() => {
+          fetchUsers()
+          toast({
+            title: "一括追加完了",
+            description: "ユーザーを追加しました",
+          })
+        }}
+      />
     </div>
   )
 }
