@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { useToast } from '@/hooks/use-toast'
+import SessionDetailModal from '@/components/SessionDetailModal'
+import ManualSessionModal from '@/components/ManualSessionModal'
 
 interface UserSession {
   id: string
@@ -11,6 +15,11 @@ interface UserSession {
   duration: number | null
   description: string | null
   isActive: boolean
+  goal: string | null
+  achievement: number | null
+  whatIDid: string | null
+  whatILearned: string | null
+  whatIWantToDo: string | null
 }
 
 interface Badge {
@@ -46,9 +55,15 @@ export default function UserDetailPage() {
   const router = useRouter()
   const params = useParams()
   const userId = params.id as string
+  const { data: session } = useSession()
+  const { toast } = useToast()
 
   const [user, setUser] = useState<UserDetail | null>(null)
   const [loading, setLoading] = useState(true)
+  const [selectedSession, setSelectedSession] = useState<UserSession | null>(null)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false)
+  const [manualLoading, setManualLoading] = useState(false)
 
   useEffect(() => {
     fetchUserDetail()
@@ -113,6 +128,62 @@ export default function UserDetailPage() {
       default:
         return rarity
     }
+  }
+
+  const handleSessionClick = (session: UserSession) => {
+    setSelectedSession(session)
+    setIsDetailModalOpen(true)
+  }
+
+  const handleManualSubmit = async (data: {
+    startTime: string
+    endTime: string
+    goal: string
+    achievement: number
+    whatIDid: string
+    whatILearned: string
+    whatIWantToDo: string
+  }) => {
+    setManualLoading(true)
+    try {
+      const response = await fetch('/api/sessions/manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          ...data
+        })
+      })
+
+      const responseData = await response.json()
+
+      if (!response.ok) {
+        throw new Error(responseData.error || 'セッション追加に失敗しました')
+      }
+
+      toast({
+        title: "追加完了",
+        description: `開発記録を追加しました${responseData.ticketsEarned > 0 ? `（ガチャ券 +${responseData.ticketsEarned}枚）` : ''}`,
+      })
+
+      setIsManualModalOpen(false)
+      fetchUserDetail()
+    } catch (error: any) {
+      toast({
+        title: "追加失敗",
+        description: error.message || '開発記録の追加に失敗しました',
+        variant: "destructive",
+      })
+    } finally {
+      setManualLoading(false)
+    }
+  }
+
+  const canAddManualSession = () => {
+    if (!session?.user) return false
+    const currentUserRole = (session.user as any).role
+    const currentUserId = (session.user as any).id
+    return currentUserRole === 'admin' || currentUserId === userId
   }
 
   if (loading) {
@@ -215,8 +286,16 @@ export default function UserDetailPage() {
 
         {/* 開発履歴 */}
         <div className="bg-white rounded-lg shadow-md">
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-xl font-bold">開発履歴</h2>
+            {canAddManualSession() && (
+              <button
+                onClick={() => setIsManualModalOpen(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+              >
+                + 開発記録を追加
+              </button>
+            )}
           </div>
 
           {completedSessions.length === 0 ? (
@@ -226,14 +305,23 @@ export default function UserDetailPage() {
           ) : (
             <div className="divide-y divide-gray-200">
               {completedSessions.map((session) => (
-                <div key={session.id} className="px-6 py-4 hover:bg-gray-50">
+                <div
+                  key={session.id}
+                  onClick={() => handleSessionClick(session)}
+                  className="px-6 py-4 hover:bg-gray-50 cursor-pointer transition"
+                >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
                       <div className="font-semibold text-gray-900">
-                        {session.description || '（説明なし）'}
+                        {session.whatIDid || session.description || '（説明なし）'}
                       </div>
                       <div className="text-sm text-gray-500 mt-1">
                         {formatDateTime(session.startTime)}
+                        {session.achievement !== null && session.achievement !== undefined && (
+                          <span className="ml-3 text-green-600 font-medium">
+                            達成度: {session.achievement}%
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="text-right ml-4">
@@ -248,6 +336,20 @@ export default function UserDetailPage() {
           )}
         </div>
       </div>
+
+      {/* モーダル */}
+      <SessionDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        session={selectedSession}
+      />
+
+      <ManualSessionModal
+        isOpen={isManualModalOpen}
+        onClose={() => setIsManualModalOpen(false)}
+        onSubmit={handleManualSubmit}
+        loading={manualLoading}
+      />
     </div>
   )
 }
