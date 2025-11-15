@@ -23,38 +23,41 @@ export async function GET(request: Request) {
       )
     }
 
-    // メンターの担当メンバーを取得
-    const members = await prisma.user.findMany({
+    // メンターの担当メンバーを取得（多対多対応）
+    const mentorMemberLinks = await prisma.mentorMember.findMany({
       where: {
         mentorId: currentUserId
       },
       include: {
-        schoolLinks: {
+        member: {
           include: {
-            school: true
-          }
-        },
-        sessions: {
-          where: {
-            isActive: true
-          },
-          select: {
-            id: true,
-            startTime: true,
-            goal: true,
-            isActive: true
-          }
-        },
-        _count: {
-          select: {
-            sessions: true
+            schoolLinks: {
+              include: {
+                school: true
+              }
+            },
+            sessions: {
+              where: {
+                isActive: true
+              },
+              select: {
+                id: true,
+                startTime: true,
+                goal: true,
+                isActive: true
+              }
+            },
+            _count: {
+              select: {
+                sessions: true
+              }
+            }
           }
         }
-      },
-      orderBy: {
-        name: 'asc'
       }
     })
+
+    const members = mentorMemberLinks.map(link => link.member)
 
     // 週の開始（月曜日0:00）を計算
     const now = new Date()

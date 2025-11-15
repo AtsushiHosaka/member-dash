@@ -3,8 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// ユーザーのメンターを設定（mentoまたはadminのみ）
-export async function PUT(
+// メンター関係をトグル（追加/削除）
+export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -27,13 +27,13 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { mentorId } = body // mentorId が null の場合は削除
+    const { mentorId } = body
 
-    const { id } = await params
+    const { id: memberId } = await params
 
     // 対象ユーザーが存在するか確認
     const targetUser = await prisma.user.findUnique({
-      where: { id },
+      where: { id: memberId },
       select: { id: true, name: true, role: true }
     })
 
@@ -41,55 +41,62 @@ export async function PUT(
       return NextResponse.json({ error: 'ユーザーが見つかりません' }, { status: 404 })
     }
 
-    // mentorIdが指定されている場合、そのユーザーがmentorであることを確認
-    if (mentorId) {
-      const mentor = await prisma.user.findUnique({
-        where: { id: mentorId },
-        select: { role: true }
-      })
+    // mentorが存在するか確認
+    const mentor = await prisma.user.findUnique({
+      where: { id: mentorId },
+      select: { role: true }
+    })
 
-      if (!mentor) {
-        return NextResponse.json({ error: 'メンターが見つかりません' }, { status: 404 })
-      }
-
-      if (mentor.role !== 'mentor' && mentor.role !== 'admin') {
-        return NextResponse.json(
-          { error: '指定されたユーザーはメンターではありません' },
-          { status: 400 }
-        )
-      }
+    if (!mentor) {
+      return NextResponse.json({ error: 'メンターが見つかりません' }, { status: 404 })
     }
 
-    // メンターでない場合は自分のメンバーのみ設定可能
-    if (currentUserRole === 'mentor' && mentorId !== currentUserId && mentorId !== null) {
+    if (mentor.role !== 'mentor' && mentor.role !== 'admin') {
+      return NextResponse.json(
+        { error: '指定されたユーザーはメンターではありません' },
+        { status: 400 }
+      )
+    }
+
+    // メンター権限の場合、自分のみ設定可能
+    if (currentUserRole === 'mentor' && mentorId !== currentUserId) {
       return NextResponse.json(
         { error: '自分のメンバーのみ設定できます' },
         { status: 403 }
       )
     }
 
-    // ユーザーのmentorIdを更新
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data: {
-        mentorId: mentorId || null
-      },
-      select: {
-        id: true,
-        userId: true,
-        name: true,
-        mentorId: true,
-        mentor: {
-          select: {
-            id: true,
-            userId: true,
-            name: true
-          }
+    // 既存の関係をチェック
+    const existingRelation = await prisma.mentorMember.findUnique({
+      where: {
+        mentorId_memberId: {
+          mentorId,
+          memberId
         }
       }
     })
 
-    return NextResponse.json(updatedUser)
+    let result
+    if (existingRelation) {
+      // 既に存在する場合は削除
+      await prisma.mentorMember.delete({
+        where: {
+          id: existingRelation.id
+        }
+      })
+      result = { action: 'removed', mentorId, memberId }
+    } else {
+      // 存在しない場合は追加
+      await prisma.mentorMember.create({
+        data: {
+          mentorId,
+          memberId
+        }
+      })
+      result = { action: 'added', mentorId, memberId }
+    }
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Mentor assignment error:', error)
     return NextResponse.json(

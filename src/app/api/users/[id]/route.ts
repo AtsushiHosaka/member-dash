@@ -18,11 +18,15 @@ export async function GET(
             school: true
           }
         },
-        mentor: {
-          select: {
-            id: true,
-            userId: true,
-            name: true
+        mentorLinks: {
+          include: {
+            mentor: {
+              select: {
+                id: true,
+                userId: true,
+                name: true
+              }
+            }
           }
         },
         sessions: {

@@ -26,16 +26,27 @@ model User {
   courses          String[]       // 複数コース対応（配列）
   avatar           String?        // Optional avatar image URL
   role             String         @default("member")  // "admin", "mentor", or "member"
-  mentorId         String?        // メンターのID（memberの場合）
-  mentor           User?          @relation("MentorToMembers", fields: [mentorId], references: [id], onDelete: SetNull)
-  members          User[]         @relation("MentorToMembers") // メンターの場合、担当メンバー
   schoolLinks      UserSchool[]   // 複数校舎対応（リレーション）
   sessions         Session[]
   gachaTickets     Int            @default(0)  // ガチャ券の枚数
   totalStudyHours  Float          @default(0)  // 累計学習時間（時間単位）
   userBadges       UserBadge[]    // 獲得したバッジ
+  mentorLinks      MentorMember[] @relation("MemberToMentors") // メンバーが持つメンター関係
+  memberLinks      MentorMember[] @relation("MentorToMembers") // メンターが持つメンバー関係
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
+}
+
+// メンターとメンバーの多対多関係
+model MentorMember {
+  id        String   @id @default(cuid())
+  mentorId  String
+  memberId  String
+  mentor    User     @relation("MentorToMembers", fields: [mentorId], references: [id], onDelete: Cascade)
+  member    User     @relation("MemberToMentors", fields: [memberId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([mentorId, memberId])
 }
 
 // ユーザーと校舎の中間テーブル

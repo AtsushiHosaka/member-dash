@@ -46,6 +46,12 @@ interface MentorInfo {
   name: string
 }
 
+interface MentorLink {
+  id: string
+  mentorId: string
+  mentor: MentorInfo
+}
+
 interface UserDetail {
   id: string
   userId: string
@@ -53,8 +59,7 @@ interface UserDetail {
   courses: string[]
   avatar: string | null
   role: string
-  mentorId: string | null
-  mentor: MentorInfo | null
+  mentorLinks: MentorLink[]
   schoolLinks: Array<{
     school: {
       id: string
@@ -127,13 +132,13 @@ export default function UserDetailPage() {
     }
   }
 
-  const handleMentorChange = async (newMentorId: string | null) => {
+  const handleMentorToggle = async (mentorId: string) => {
     setMentorLoading(true)
     try {
       const response = await fetch(`/api/users/${userId}/mentor`, {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mentorId: newMentorId })
+        body: JSON.stringify({ mentorId })
       })
 
       if (!response.ok) {
@@ -141,9 +146,11 @@ export default function UserDetailPage() {
         throw new Error(error.error || 'メンター設定に失敗しました')
       }
 
+      const result = await response.json()
+
       toast({
         title: "設定完了",
-        description: newMentorId ? "メンターを設定しました" : "メンター設定を解除しました",
+        description: result.action === 'added' ? "メンバーを追加しました" : "メンバーを削除しました",
       })
 
       fetchUserDetail()
@@ -156,6 +163,10 @@ export default function UserDetailPage() {
     } finally {
       setMentorLoading(false)
     }
+  }
+
+  const isMentorAssigned = (mentorId: string) => {
+    return user?.mentorLinks?.some(link => link.mentorId === mentorId) || false
   }
 
   const formatDuration = (seconds: number) => {
@@ -272,12 +283,16 @@ export default function UserDetailPage() {
     if (!session?.user) return false
     const currentUserRole = (session.user as any).role
     const currentUserId = (session.user as any).id
-    // adminは全員のメンターを設定可能、mentorは自分のメンバーのみ設定可能
+
+    // 自分自身のページでは表示しない
+    if (currentUserId === userId) return false
+
+    // adminは他の全員のメンターを設定可能
     if (currentUserRole === 'admin') return true
-    if (currentUserRole === 'mentor') {
-      // 自分が担当するメンバーとして追加/削除する場合
-      return true
-    }
+
+    // mentorは他のユーザー（メンバー）のページでのみ設定可能
+    if (currentUserRole === 'mentor') return true
+
     return false
   }
 
@@ -403,31 +418,54 @@ export default function UserDetailPage() {
           {canManageMentor() && (
             <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
               <div className="text-sm font-semibold text-purple-900 mb-3">担当メンター設定</div>
-              <div className="flex items-center gap-3">
-                <select
-                  value={user.mentorId || ''}
-                  onChange={(e) => handleMentorChange(e.target.value || null)}
-                  disabled={mentorLoading}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100"
-                >
-                  <option value="">メンターなし</option>
-                  {availableMentors.map((mentor) => (
-                    <option key={mentor.id} value={mentor.id}>
-                      {mentor.name} (@{mentor.userId})
-                    </option>
-                  ))}
-                  {session?.user && (session.user as any).role === 'mentor' && (
-                    <option value={(session.user as any).id}>
-                      自分 ({(session.user as any).name})
-                    </option>
-                  )}
-                </select>
-                {user.mentor && (
-                  <div className="text-sm text-gray-600">
-                    現在: {user.mentor.name}
+
+              {/* 現在のメンター一覧 */}
+              {user.mentorLinks && user.mentorLinks.length > 0 && (
+                <div className="mb-3 text-sm text-gray-700">
+                  現在のメンター: {user.mentorLinks.map(link => link.mentor.name).join(', ')}
+                </div>
+              )}
+
+              {/* メンター選択 (自分がmentorの場合のみ) */}
+              {session?.user && (session.user as any).role === 'mentor' && (
+                <label className="flex items-center gap-3 p-3 bg-white rounded-lg border border-purple-300 cursor-pointer hover:bg-purple-50 transition">
+                  <input
+                    type="checkbox"
+                    checked={isMentorAssigned((session.user as any).id)}
+                    onChange={() => handleMentorToggle((session.user as any).id)}
+                    disabled={mentorLoading}
+                    className="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900">私のメンバーである</div>
+                    <div className="text-xs text-gray-500">このユーザーを自分の担当メンバーにする</div>
                   </div>
-                )}
-              </div>
+                </label>
+              )}
+
+              {/* admin用: すべてのメンター選択 */}
+              {session?.user && (session.user as any).role === 'admin' && (
+                <div className="space-y-2">
+                  {availableMentors.map((mentor) => (
+                    <label
+                      key={mentor.id}
+                      className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-300 cursor-pointer hover:bg-gray-50 transition"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isMentorAssigned(mentor.id)}
+                        onChange={() => handleMentorToggle(mentor.id)}
+                        disabled={mentorLoading}
+                        className="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{mentor.name}</div>
+                        <div className="text-xs text-gray-500">@{mentor.userId}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
