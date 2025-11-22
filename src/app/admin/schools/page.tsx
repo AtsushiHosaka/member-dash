@@ -50,6 +50,11 @@ export default function SchoolsAdminPage() {
         body: JSON.stringify({ name: newSchoolName })
       })
 
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
+
       if (response.ok) {
         setNewSchoolName('')
         fetchSchools()
@@ -74,6 +79,11 @@ export default function SchoolsAdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: editingName })
       })
+
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
 
       if (response.ok) {
         setEditingId(null)
@@ -100,6 +110,11 @@ export default function SchoolsAdminPage() {
       const response = await fetch(`/api/schools/${id}`, {
         method: 'DELETE'
       })
+
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
 
       if (response.ok) {
         fetchSchools()

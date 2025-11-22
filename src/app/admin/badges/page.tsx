@@ -75,6 +75,11 @@ export default function BadgesAdminPage() {
         body: JSON.stringify(formData)
       })
 
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
+
       if (response.ok) {
         setFormData({ name: '', icon: '', rarity: 'common' })
         setIsAddModalOpen(false)
@@ -102,6 +107,11 @@ export default function BadgesAdminPage() {
         body: JSON.stringify(formData)
       })
 
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
+
       if (response.ok) {
         setEditingBadge(null)
         setFormData({ name: '', icon: '', rarity: 'common' })
@@ -127,6 +137,11 @@ export default function BadgesAdminPage() {
       const response = await fetch(`/api/admin/badges/${badge.id}`, {
         method: 'DELETE'
       })
+
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
 
       if (response.ok) {
         fetchBadges()

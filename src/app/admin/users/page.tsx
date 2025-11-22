@@ -85,6 +85,10 @@ export default function UsersAdminPage() {
   const fetchSchools = async () => {
     try {
       const response = await fetch('/api/schools')
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
       if (response.ok) {
         const data = await response.json()
         setSchools(data)
@@ -114,6 +118,11 @@ export default function UsersAdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingData)
       })
+
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
 
       if (response.ok) {
         setEditingId(null)

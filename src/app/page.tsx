@@ -61,6 +61,10 @@ export default function Dashboard() {
   const fetchActiveSession = async () => {
     try {
       const response = await fetch('/api/sessions')
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
       const data = await response.json()
       setActiveSession(data.session)
     } catch (error) {
@@ -75,6 +79,10 @@ export default function Dashboard() {
         ? `/api/ranking?schoolId=${schoolId}`
         : '/api/ranking'
       const response = await fetch(url)
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
       const data = await response.json()
       setRanking(data)
     } catch (error) {
@@ -91,6 +99,10 @@ export default function Dashboard() {
   const fetchActiveMembers = async () => {
     try {
       const response = await fetch('/api/active-members')
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
       const data = await response.json()
       setActiveMembers(data)
     } catch (error) {
@@ -117,6 +129,10 @@ export default function Dashboard() {
   const fetchMentorMembers = async () => {
     try {
       const response = await fetch('/api/mentor/members')
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
       if (response.ok) {
         const data = await response.json()
         setMentorMembers(data)
@@ -140,6 +156,11 @@ export default function Dashboard() {
         },
         body: JSON.stringify({ goal: goalText })
       })
+
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
 
       if (response.ok) {
         const data = await response.json()
@@ -179,6 +200,11 @@ export default function Dashboard() {
         },
         body: JSON.stringify(data)
       })
+
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
 
       if (response.ok) {
         const responseData = await response.json()

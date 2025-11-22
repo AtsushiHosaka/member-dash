@@ -75,6 +75,11 @@ export default function GachaPage() {
         method: 'POST'
       })
 
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
+
       const data: GachaResult = await response.json()
 
       if (response.ok && data.success) {

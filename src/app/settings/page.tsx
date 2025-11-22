@@ -102,6 +102,10 @@ export default function AccountPage() {
   const fetchSchools = async () => {
     try {
       const response = await fetch('/api/schools')
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
       if (response.ok) {
         const data = await response.json()
         setSchools(data)
@@ -159,6 +163,11 @@ export default function AccountPage() {
         })
       })
 
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
+
       if (response.ok) {
         alert('保存しました')
         router.push('/')
@@ -206,6 +215,11 @@ export default function AccountPage() {
           newPassword
         })
       })
+
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
 
       const data = await response.json()
 

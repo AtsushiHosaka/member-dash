@@ -41,6 +41,10 @@ export default function NamingPollSettingsPage() {
           'Expires': '0'
         }
       })
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
       if (response.ok) {
         const data = await response.json()
         console.log('Fetched poll data:', data) // デバッグ用
@@ -53,7 +57,7 @@ export default function NamingPollSettingsPage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [router])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -105,6 +109,11 @@ export default function NamingPollSettingsPage() {
         body: JSON.stringify({ isActive: newState })
       })
 
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
+
       if (response.ok) {
         const data = await response.json()
         console.log('Toggle response:', data) // デバッグ用
@@ -137,6 +146,11 @@ export default function NamingPollSettingsPage() {
         body: JSON.stringify({ text: newOptionText })
       })
 
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
+
       if (response.ok) {
         setNewOptionText('')
         await fetchPoll()
@@ -161,6 +175,11 @@ export default function NamingPollSettingsPage() {
       const response = await fetch(`/api/admin/naming-poll/options/${optionId}`, {
         method: 'DELETE'
       })
+
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
 
       if (response.ok) {
         await fetchPoll()

@@ -69,6 +69,10 @@ export default function BadgesPage() {
   const fetchUsers = async () => {
     try {
       const response = await fetch('/api/admin/users')
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
       if (response.ok) {
         const data = await response.json()
         setUsers(data)
@@ -109,6 +113,11 @@ export default function BadgesPage() {
           allowedUserIds: editForm.allowedUserIds
         })
       })
+
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
 
       if (response.ok) {
         await fetchBadges()
