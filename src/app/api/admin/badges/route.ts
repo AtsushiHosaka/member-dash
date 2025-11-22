@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// バッジ一覧を取得（管理者のみ）
+// バッジ一覧を取得（管理者・メンター）
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -14,9 +14,9 @@ export async function GET(request: Request) {
 
     const userRole = (session.user as any).role
 
-    if (userRole !== 'admin') {
+    if (userRole !== 'admin' && userRole !== 'mentor') {
       return NextResponse.json(
-        { error: '管理者権限が必要です' },
+        { error: '管理者またはメンター権限が必要です' },
         { status: 403 }
       )
     }
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
   }
 }
 
-// バッジを追加（管理者のみ）
+// バッジを追加（管理者・メンター）
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -55,15 +55,15 @@ export async function POST(request: Request) {
 
     const userRole = (session.user as any).role
 
-    if (userRole !== 'admin') {
+    if (userRole !== 'admin' && userRole !== 'mentor') {
       return NextResponse.json(
-        { error: '管理者権限が必要です' },
+        { error: '管理者またはメンター権限が必要です' },
         { status: 403 }
       )
     }
 
     const body = await request.json()
-    const { name, icon, rarity } = body
+    const { name, icon, isPublic, allowedUserIds } = body
 
     // バリデーション
     if (!name || !name.trim()) {
@@ -80,18 +80,12 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!rarity || !['common', 'rare', 'epic', 'legendary'].includes(rarity)) {
-      return NextResponse.json(
-        { error: 'レアリティは必須です（common, rare, epic, legendary）' },
-        { status: 400 }
-      )
-    }
-
     const badge = await prisma.badge.create({
       data: {
         name: name.trim(),
         icon: icon.trim(),
-        rarity
+        isPublic: isPublic !== undefined ? isPublic : true,
+        allowedUserIds: allowedUserIds || []
       }
     })
 

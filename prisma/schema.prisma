@@ -115,13 +115,14 @@ model SessionEditHistory {
 
 // ガチャから出るバッジ（景品）
 model Badge {
-  id          String      @id @default(cuid())
-  name        String      // バッジ名
-  icon        String      // アイコン（絵文字または画像URL）
-  rarity      String      // レアリティ（common, rare, epic, legendary）
-  userBadges  UserBadge[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id             String      @id @default(cuid())
+  name           String      // バッジ名
+  icon           String      // アイコン（絵文字または画像パス）
+  isPublic       Boolean     @default(true) // 誰にでも表示されるか
+  allowedUserIds String[]    @default([]) // 特定ユーザーのみの場合、許可されたユーザーIDリスト
+  userBadges     UserBadge[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 }
 
 // ユーザーが獲得したバッジ

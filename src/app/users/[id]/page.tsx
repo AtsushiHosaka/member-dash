@@ -11,8 +11,43 @@ import SessionEditModal from '@/components/SessionEditModal'
 import SessionHistoryModal from '@/components/SessionHistoryModal'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
-// アバター絵文字一覧
-const AVATAR_EMOJIS = ['😀', '😎', '🤓', '😊', '🥳', '🤔', '😴', '🤖', '👻', '🦄']
+// 利用可能なアイコン一覧（絵文字と画像パス）
+const AVAILABLE_ICONS = [
+  // 絵文字
+  { type: 'emoji', data: '😀' },
+  { type: 'emoji', data: '😎' },
+  { type: 'emoji', data: '🤓' },
+  { type: 'emoji', data: '😊' },
+  { type: 'emoji', data: '🥳' },
+  { type: 'emoji', data: '🤔' },
+  { type: 'emoji', data: '😴' },
+  { type: 'emoji', data: '🤖' },
+  { type: 'emoji', data: '👻' },
+  { type: 'emoji', data: '🦄' },
+  { type: 'emoji', data: '❤️' },
+  { type: 'emoji', data: '🚀' },
+  { type: 'emoji', data: '⭐' },
+  { type: 'emoji', data: '🏆' },
+  { type: 'emoji', data: '🔥' },
+  { type: 'emoji', data: '👍' },
+  { type: 'emoji', data: '✨' },
+  { type: 'emoji', data: '🌈' },
+  { type: 'emoji', data: '🍕' },
+  { type: 'emoji', data: '☕' },
+  { type: 'emoji', data: '📚' },
+  { type: 'emoji', data: '💻' },
+  { type: 'emoji', data: '🎮' },
+  { type: 'emoji', data: '🎵' },
+  { type: 'emoji', data: '⚽' },
+  { type: 'emoji', data: '🏀' },
+  { type: 'emoji', data: '📷' },
+  { type: 'emoji', data: '🎨' },
+  { type: 'emoji', data: '🐱' },
+  { type: 'emoji', data: '🐶' },
+  // 画像アイコン（例: public/icons/ 以下に配置した画像）
+  // { type: 'image', data: '/icons/example.png' },
+  { type: 'image', data: '/icons/meimei.png' },
+] as const
 
 interface UserSession {
   id: string
@@ -35,7 +70,6 @@ interface Badge {
   id: string
   name: string
   icon: string
-  rarity: string
 }
 
 interface UserBadge {
@@ -234,36 +268,6 @@ export default function UserDetailPage() {
     })
   }
 
-  const getRarityColor = (rarity: string) => {
-    switch (rarity) {
-      case 'common':
-        return 'bg-gray-200 text-gray-800'
-      case 'rare':
-        return 'bg-blue-200 text-blue-800'
-      case 'epic':
-        return 'bg-purple-200 text-purple-800'
-      case 'legendary':
-        return 'bg-yellow-200 text-yellow-800'
-      default:
-        return 'bg-gray-200 text-gray-800'
-    }
-  }
-
-  const getRarityName = (rarity: string) => {
-    switch (rarity) {
-      case 'common':
-        return 'コモン'
-      case 'rare':
-        return 'レア'
-      case 'epic':
-        return 'エピック'
-      case 'legendary':
-        return '伝説'
-      default:
-        return rarity
-    }
-  }
-
   const handleSessionClick = (session: UserSession) => {
     setSelectedSession(session)
     setIsDetailModalOpen(true)
@@ -443,9 +447,13 @@ export default function UserDetailPage() {
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center gap-6">
             <div className="flex flex-col items-center gap-2">
-              <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-3xl font-bold">
+              <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-3xl font-bold overflow-hidden">
                 {user.avatar ? (
-                  <span className="text-4xl">{user.avatar}</span>
+                  user.avatar.startsWith('/') ? (
+                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-4xl">{user.avatar}</span>
+                  )
                 ) : (
                   <span className="text-white">{user.name.charAt(0).toUpperCase()}</span>
                 )}
@@ -476,12 +484,11 @@ export default function UserDetailPage() {
                 {user.userBadges.map((userBadge) => (
                   <div
                     key={userBadge.id}
-                    className={`p-3 rounded-lg border-2 ${getRarityColor(userBadge.badge.rarity)}`}
+                    className="p-3 rounded-lg border-2 bg-gray-100 border-gray-300"
                   >
                     <div className="text-center">
                       <div className="text-3xl mb-1">{userBadge.badge.icon}</div>
                       <div className="text-xs font-semibold">{userBadge.badge.name}</div>
-                      <div className="text-xs mt-1">{getRarityName(userBadge.badge.rarity)}</div>
                     </div>
                   </div>
                 ))}
@@ -555,12 +562,9 @@ export default function UserDetailPage() {
                     className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition"
                   >
                     <div className="text-5xl mb-3">{userBadge.badge.icon}</div>
-                    <div className="text-sm font-semibold text-gray-900 text-center mb-2">
+                    <div className="text-sm font-semibold text-gray-900 text-center">
                       {userBadge.badge.name}
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${getRarityColor(userBadge.badge.rarity)}`}>
-                      {getRarityName(userBadge.badge.rarity)}
-                    </span>
                   </div>
                 ))}
               </div>
@@ -669,25 +673,33 @@ export default function UserDetailPage() {
           <div className="py-4">
             {selectedAvatar && (
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-3xl">{selectedAvatar}</span>
+                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                  {selectedAvatar.startsWith('/') ? (
+                    <img src={selectedAvatar} alt="Selected" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-3xl">{selectedAvatar}</span>
+                  )}
                 </div>
-                <span className="text-sm text-gray-600">選択中: {selectedAvatar}</span>
+                <span className="text-sm text-gray-600">選択中のアイコン</span>
               </div>
             )}
             <div className="grid grid-cols-5 gap-2 mb-4">
-              {AVATAR_EMOJIS.map((emoji) => (
+              {AVAILABLE_ICONS.map((icon, index) => (
                 <button
-                  key={emoji}
+                  key={index}
                   type="button"
-                  onClick={() => setSelectedAvatar(emoji)}
-                  className={`text-4xl p-3 rounded-lg transition hover:bg-gray-100 ${
-                    selectedAvatar === emoji
+                  onClick={() => setSelectedAvatar(icon.data)}
+                  className={`p-3 rounded-lg transition hover:bg-gray-100 ${
+                    selectedAvatar === icon.data
                       ? 'bg-blue-100 ring-2 ring-blue-500'
                       : 'bg-gray-50'
                   }`}
                 >
-                  {emoji}
+                  {icon.type === 'emoji' ? (
+                    <span className="text-4xl">{icon.data}</span>
+                  ) : (
+                    <img src={icon.data} alt="Icon" className="w-12 h-12 object-cover rounded" />
+                  )}
                 </button>
               ))}
             </div>

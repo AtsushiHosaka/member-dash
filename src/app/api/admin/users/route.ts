@@ -14,9 +14,9 @@ export async function GET(request: Request) {
 
     const userRole = (session.user as any).role
 
-    if (userRole !== 'admin') {
+    if (userRole !== 'admin' && userRole !== 'mentor') {
       return NextResponse.json(
-        { error: '管理者権限が必要です' },
+        { error: '管理者またはメンター権限が必要です' },
         { status: 403 }
       )
     }

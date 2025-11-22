@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// バッジを削除（管理者のみ）
+// バッジを削除（管理者・メンター）
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -17,9 +17,9 @@ export async function DELETE(
 
     const userRole = (session.user as any).role
 
-    if (userRole !== 'admin') {
+    if (userRole !== 'admin' && userRole !== 'mentor') {
       return NextResponse.json(
-        { error: '管理者権限が必要です' },
+        { error: '管理者またはメンター権限が必要です' },
         { status: 403 }
       )
     }
@@ -53,7 +53,7 @@ export async function DELETE(
   }
 }
 
-// バッジを編集（管理者のみ）
+// バッジを編集（管理者・メンター）
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -67,16 +67,16 @@ export async function PATCH(
 
     const userRole = (session.user as any).role
 
-    if (userRole !== 'admin') {
+    if (userRole !== 'admin' && userRole !== 'mentor') {
       return NextResponse.json(
-        { error: '管理者権限が必要です' },
+        { error: '管理者またはメンター権限が必要です' },
         { status: 403 }
       )
     }
 
     const { id } = await params
     const body = await request.json()
-    const { name, icon, rarity } = body
+    const { name, icon, isPublic, allowedUserIds } = body
 
     // バッジが存在するか確認
     const badge = await prisma.badge.findUnique({
@@ -105,20 +105,14 @@ export async function PATCH(
       )
     }
 
-    if (rarity !== undefined && !['common', 'rare', 'epic', 'legendary'].includes(rarity)) {
-      return NextResponse.json(
-        { error: 'レアリティは必須です（common, rare, epic, legendary）' },
-        { status: 400 }
-      )
-    }
-
     // バッジを更新
     const updatedBadge = await prisma.badge.update({
       where: { id },
       data: {
         ...(name !== undefined && { name: name.trim() }),
         ...(icon !== undefined && { icon: icon.trim() }),
-        ...(rarity !== undefined && { rarity })
+        ...(isPublic !== undefined && { isPublic }),
+        ...(allowedUserIds !== undefined && { allowedUserIds })
       }
     })
 
