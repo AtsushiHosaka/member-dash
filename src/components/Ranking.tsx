@@ -13,7 +13,7 @@ interface RankingUser {
   name: string
   courses: string[]
   avatar: string | null
-  totalDuration: number
+  daysCount: number
   isActive: boolean
 }
 
@@ -29,10 +29,8 @@ export default function Ranking({ users, currentUserId, userSchools, onSchoolCha
   const router = useRouter()
   const [selectedSchool, setSelectedSchool] = useState<string>('')
 
-  const formatDuration = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    return `${hours}時間${minutes}分`
+  const formatDaysCount = (days: number) => {
+    return `${days}日`
   }
 
   const handleUserClick = (userId: string) => {
@@ -48,7 +46,7 @@ export default function Ranking({ users, currentUserId, userSchools, onSchoolCha
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">今週のランキング</h2>
+        <h2 className="text-xl font-bold">今週の開発日数</h2>
         {userSchools.length > 1 && (
           <select
             value={selectedSchool}
@@ -68,10 +66,10 @@ export default function Ranking({ users, currentUserId, userSchools, onSchoolCha
       {loading ? (
         <div className="flex flex-col items-center justify-center py-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-500">ランキング読み込み中...</p>
+          <p className="text-gray-500">読み込み中...</p>
         </div>
       ) : users.length === 0 ? (
-        <p className="text-gray-500 text-center py-4">まだデータがありません</p>
+        <p className="text-gray-500 text-center py-4">今週開発したメンバーはまだいません</p>
       ) : (
         <div className="space-y-3">
           {users.map((user, index) => (
@@ -119,7 +117,7 @@ export default function Ranking({ users, currentUserId, userSchools, onSchoolCha
               </div>
 
               <div className="text-right">
-                <div className="font-bold text-lg">{formatDuration(user.totalDuration)}</div>
+                <div className="font-bold text-lg">{formatDaysCount(user.daysCount)}</div>
               </div>
             </div>
           ))}

@@ -2,7 +2,45 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { startOfWeek, endOfWeek } from 'date-fns'
+
+// スクール名から曜日を取得
+function getSchoolDayOfWeek(schoolName: string): number {
+  if (schoolName.includes('日曜')) return 0
+  if (schoolName.includes('月曜')) return 1
+  if (schoolName.includes('火曜')) return 2
+  if (schoolName.includes('水曜')) return 3
+  if (schoolName.includes('木曜')) return 4
+  if (schoolName.includes('金曜')) return 5
+  if (schoolName.includes('土曜')) return 6
+  return 0 // デフォルトは日曜日
+}
+
+// スクールの週の範囲を取得（前日0:00 ~ 当日23:59）
+function getSchoolWeekRange(schoolDayOfWeek: number): { start: Date; end: Date } {
+  const now = new Date()
+  const currentDayOfWeek = now.getDay()
+
+  // スクール日までの日数を計算（前週のスクール日の次の日から今週のスクール日まで）
+  let daysFromSchoolDay = currentDayOfWeek - schoolDayOfWeek
+  if (daysFromSchoolDay < 0) {
+    daysFromSchoolDay += 7
+  }
+
+  // 今週のスクール日を計算
+  const schoolDay = new Date(now)
+  schoolDay.setDate(now.getDate() - daysFromSchoolDay)
+  schoolDay.setHours(23, 59, 59, 999)
+
+  // 週の開始日（前日の0:00）
+  const weekStart = new Date(schoolDay)
+  weekStart.setDate(schoolDay.getDate() - 6)
+  weekStart.setHours(0, 0, 0, 0)
+
+  return {
+    start: weekStart,
+    end: schoolDay
+  }
+}
 
 export async function GET(request: Request) {
   try {
@@ -22,10 +60,23 @@ export async function GET(request: Request) {
     // フィルタがあればそのスクールのみ、なければ全てのスクール
     const schoolIds = filterSchoolId ? [filterSchoolId] : allSchoolIds
 
-    // 今週の開始と終了を取得
-    const now = new Date()
-    const weekStart = startOfWeek(now, { weekStartsOn: 0 }) // 日曜日始まり
-    const weekEnd = endOfWeek(now, { weekStartsOn: 0 })
+    // 選択されたスクール情報を取得（週の範囲を計算するため）
+    const schoolsData = await prisma.school.findMany({
+      where: {
+        id: {
+          in: schoolIds
+        }
+      }
+    })
+
+    // 複数スクールの場合は最初のスクールの曜日を使用
+    const primarySchool = schoolsData[0]
+    if (!primarySchool) {
+      return NextResponse.json([])
+    }
+
+    const schoolDayOfWeek = getSchoolDayOfWeek(primarySchool.name)
+    const { start: weekStart, end: weekEnd } = getSchoolWeekRange(schoolDayOfWeek)
 
     // 同じスクールに属するユーザーを取得（複数校舎対応）
     const users = await prisma.user.findMany({
@@ -68,24 +119,20 @@ export async function GET(request: Request) {
       }
     })
 
-    // ランキングデータを作成
+    // 開発日数を計算
     const ranking = users.map(user => {
-      // 今週の完了済みセッションの合計時間を計算
-      const completedDuration = user.sessions
-        .filter(session => !session.isActive && session.duration)
-        .reduce((sum, session) => sum + (session.duration || 0), 0)
+      // セッションの開始日を取得してユニークな日付のセットを作成
+      const developmentDates = new Set<string>()
 
-      // 現在開発中のセッションの時間を計算
-      const activeSession = user.sessions.find(session => session.isActive)
-      const activeDuration = activeSession
-        ? Math.floor((Date.now() - new Date(activeSession.startTime).getTime()) / 1000)
-        : 0
+      user.sessions.forEach(session => {
+        const sessionDate = new Date(session.startTime)
+        // YYYY-MM-DD形式で日付をキーにする
+        const dateKey = sessionDate.toISOString().split('T')[0]
+        developmentDates.add(dateKey)
+      })
 
-      // 合計時間（完了 + 現在開発中）
-      const totalDuration = completedDuration + activeDuration
-
-      // 現在開発中かどうかをチェック
-      const isCurrentlyActive = !!activeSession
+      const daysCount = developmentDates.size
+      const isCurrentlyActive = user.sessions.some(s => s.isActive)
 
       return {
         id: user.id,
@@ -96,15 +143,18 @@ export async function GET(request: Request) {
           name: link.school.name
         })),
         avatar: user.avatar,
-        totalDuration,
+        daysCount,
         isActive: isCurrentlyActive
       }
     })
 
-    // 開発時間でソート
-    ranking.sort((a, b) => b.totalDuration - a.totalDuration)
+    // 開発日数が1日以上のメンバーのみフィルタリング
+    const filteredRanking = ranking.filter(user => user.daysCount > 0)
 
-    return NextResponse.json(ranking)
+    // 開発日数でソート
+    filteredRanking.sort((a, b) => b.daysCount - a.daysCount)
+
+    return NextResponse.json(filteredRanking)
   } catch (error) {
     console.error('Ranking fetch error:', error)
     return NextResponse.json(
