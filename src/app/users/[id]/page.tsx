@@ -46,7 +46,6 @@ const AVAILABLE_ICONS = [
   { type: 'emoji', data: '🐶' },
   // 画像アイコン（例: public/icons/ 以下に配置した画像）
   // { type: 'image', data: '/icons/example.png' },
-  { type: 'image', data: '/icons/meimei.png' },
 ] as const
 
 interface UserSession {

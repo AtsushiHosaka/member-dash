@@ -134,3 +134,36 @@ model UserBadge {
   badge      Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
   obtainedAt DateTime @default(now())
 }
+
+// 命名投票
+model NamingPoll {
+  id        String             @id @default(cuid())
+  isActive  Boolean            @default(false) // 投票を表示するかどうか
+  options   NamingPollOption[]
+  votes     NamingPollVote[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+// 命名投票の選択肢
+model NamingPollOption {
+  id        String           @id @default(cuid())
+  pollId    String
+  poll      NamingPoll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  text      String           // 選択肢のテキスト
+  votes     NamingPollVote[]
+  createdAt DateTime         @default(now())
+}
+
+// 命名投票の投票記録
+model NamingPollVote {
+  id        String           @id @default(cuid())
+  pollId    String
+  poll      NamingPoll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  optionId  String
+  option    NamingPollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  userId    String
+  votedAt   DateTime         @default(now())
+
+  @@unique([pollId, userId]) // 各ユーザーは1つの投票に1回のみ投票可能
+}

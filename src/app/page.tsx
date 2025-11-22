@@ -10,6 +10,7 @@ import StartSessionModal from '@/components/StartSessionModal'
 import Ranking from '@/components/Ranking'
 import ActiveMembers from '@/components/ActiveMembers'
 import MentorMembers from '@/components/MentorMembers'
+import NamingPoll from '@/components/NamingPoll'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
@@ -291,6 +292,9 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+
+        {/* 命名投票 */}
+        <NamingPoll />
 
         {/* メンター向け担当メンバー一覧 */}
         {(userRole === 'mentor' || userRole === 'admin') && (
