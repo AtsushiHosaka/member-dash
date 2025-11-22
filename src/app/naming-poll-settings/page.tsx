@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2 } from 'lucide-react'
@@ -25,55 +25,111 @@ export default function NamingPollSettingsPage() {
   const [poll, setPoll] = useState<Poll | null>(null)
   const [loading, setLoading] = useState(true)
   const [newOptionText, setNewOptionText] = useState('')
+  const [toggling, setToggling] = useState(false)
+  const [addingOption, setAddingOption] = useState(false)
+  const [deletingOptions, setDeletingOptions] = useState<Set<string>>(new Set())
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login')
-    } else if (status === 'authenticated') {
-      const userRole = (session?.user as any)?.role
-      if (userRole !== 'admin' && userRole !== 'mentor') {
-        router.push('/')
-        return
-      }
-      fetchPoll()
-    }
-  }, [status, session, router])
-
-  const fetchPoll = async () => {
+  const fetchPoll = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/naming-poll')
+      const timestamp = new Date().getTime()
+      const response = await fetch(`/api/admin/naming-poll?t=${timestamp}`, {
+        // キャッシュを無効化して常に最新のデータを取得
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      })
       if (response.ok) {
         const data = await response.json()
+        console.log('Fetched poll data:', data) // デバッグ用
         setPoll(data)
+      } else {
+        console.error('Failed to fetch poll:', response.status)
       }
     } catch (error) {
       console.error('Failed to fetch poll:', error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login')
+      return
+    }
+
+    if (status === 'authenticated') {
+      const userRole = (session?.user as any)?.role
+      if (userRole !== 'admin' && userRole !== 'mentor') {
+        router.push('/')
+        return
+      }
+
+      // ページマウント時に必ずデータを取得
+      setLoading(true)
+      fetchPoll()
+    }
+  }, [status, session, router, fetchPoll])
+
+  // ページがフォーカスされたときにもデータを再取得
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && status === 'authenticated') {
+        console.log('Page became visible, refetching poll data')
+        fetchPoll()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [status, fetchPoll])
 
   const toggleActive = async () => {
-    if (!poll) return
+    if (!poll || toggling) return
+
+    // 楽観的UI更新
+    const previousState = poll.isActive
+    const newState = !previousState
+    setPoll({ ...poll, isActive: newState })
+    setToggling(true)
 
     try {
       const response = await fetch('/api/admin/naming-poll', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: !poll.isActive })
+        body: JSON.stringify({ isActive: newState })
       })
 
       if (response.ok) {
-        await fetchPoll()
+        const data = await response.json()
+        console.log('Toggle response:', data) // デバッグ用
+        // APIレスポンスのisActiveを正しく反映
+        setPoll(prev => prev ? { ...prev, isActive: data.isActive } : null)
+      } else {
+        // エラー時は元に戻す
+        console.error('Toggle failed:', response.status)
+        setPoll(prev => prev ? { ...prev, isActive: previousState } : null)
+        alert('設定の変更に失敗しました')
       }
     } catch (error) {
       console.error('Failed to toggle poll:', error)
+      // エラー時は元に戻す
+      setPoll(prev => prev ? { ...prev, isActive: previousState } : null)
+      alert('設定の変更に失敗しました')
+    } finally {
+      setToggling(false)
     }
   }
 
   const addOption = async () => {
-    if (!newOptionText.trim()) return
+    if (!newOptionText.trim() || addingOption) return
 
+    setAddingOption(true)
     try {
       const response = await fetch('/api/admin/naming-poll/options', {
         method: 'POST',
@@ -91,12 +147,16 @@ export default function NamingPollSettingsPage() {
     } catch (error) {
       console.error('Failed to add option:', error)
       alert('選択肢の追加に失敗しました')
+    } finally {
+      setAddingOption(false)
     }
   }
 
   const deleteOption = async (optionId: string) => {
     if (!confirm('この選択肢を削除しますか？関連する投票も削除されます。')) return
+    if (deletingOptions.has(optionId)) return
 
+    setDeletingOptions(prev => new Set(prev).add(optionId))
     try {
       const response = await fetch(`/api/admin/naming-poll/options/${optionId}`, {
         method: 'DELETE'
@@ -111,6 +171,12 @@ export default function NamingPollSettingsPage() {
     } catch (error) {
       console.error('Failed to delete option:', error)
       alert('選択肢の削除に失敗しました')
+    } finally {
+      setDeletingOptions(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(optionId)
+        return newSet
+      })
     }
   }
 
@@ -139,15 +205,18 @@ export default function NamingPollSettingsPage() {
         {/* 投票の表示/非表示 */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">投票の表示設定</h2>
-          <label className="flex items-center gap-3 cursor-pointer">
+          <label className={`flex items-center gap-3 ${toggling ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
             <input
               type="checkbox"
               checked={poll?.isActive ?? false}
               onChange={toggleActive}
-              className="w-5 h-5 rounded"
+              disabled={toggling}
+              className="w-5 h-5 rounded disabled:cursor-not-allowed"
             />
             <div>
-              <div className="font-medium text-gray-900">投票を表示する</div>
+              <div className="font-medium text-gray-900">
+                投票を表示する {toggling && <span className="text-sm text-gray-500">(更新中...)</span>}
+              </div>
               <div className="text-sm text-gray-600">
                 チェックを入れると、すべてのユーザーに投票が表示されます
               </div>
@@ -169,10 +238,11 @@ export default function NamingPollSettingsPage() {
             />
             <button
               onClick={addOption}
-              className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+              disabled={addingOption}
+              className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
             >
               <Plus className="w-5 h-5" />
-              追加
+              {addingOption ? '追加中...' : '追加'}
             </button>
           </div>
         </div>
@@ -214,9 +284,14 @@ export default function NamingPollSettingsPage() {
                   </div>
                   <button
                     onClick={() => deleteOption(option.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                    disabled={deletingOptions.has(option.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Trash2 className="w-5 h-5" />
+                    {deletingOptions.has(option.id) ? (
+                      <span className="text-sm">削除中...</span>
+                    ) : (
+                      <Trash2 className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
               ))

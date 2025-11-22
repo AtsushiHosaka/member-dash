@@ -58,7 +58,11 @@ export async function GET(request: Request) {
       })
     }
 
-    return NextResponse.json(poll)
+    const response = NextResponse.json(poll)
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+    return response
   } catch (error) {
     console.error('Naming poll fetch error:', error)
     return NextResponse.json(
@@ -105,7 +109,11 @@ export async function PATCH(request: Request) {
       })
     }
 
-    return NextResponse.json(poll)
+    const response = NextResponse.json(poll)
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+    return response
   } catch (error) {
     console.error('Naming poll update error:', error)
     return NextResponse.json(
