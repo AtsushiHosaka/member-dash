@@ -33,26 +33,29 @@ export async function GET(request: Request) {
         votes: {
           where: {
             userId
+          },
+          orderBy: {
+            voteNumber: 'asc'
           }
         }
       }
     })
 
     if (!poll) {
-      return NextResponse.json({ poll: null, hasVoted: false })
+      return NextResponse.json({ poll: null, voteCount: 0, votes: [] })
     }
 
-    // このユーザーが投票済みかどうか
-    const hasVoted = poll.votes.length > 0
-    const votedOptionId = hasVoted ? poll.votes[0].optionId : null
+    // このユーザーの投票状況
+    const voteCount = poll.votes.length // 0, 1, or 2
+    const votes = poll.votes.map(v => ({ optionId: v.optionId, voteNumber: v.voteNumber }))
 
     return NextResponse.json({
       poll: {
         id: poll.id,
         options: poll.options
       },
-      hasVoted,
-      votedOptionId
+      voteCount,
+      votes
     })
   } catch (error) {
     console.error('Naming poll fetch error:', error)
@@ -107,33 +110,36 @@ export async function POST(request: Request) {
       )
     }
 
-    // 既に投票済みか確認
-    const existingVote = await prisma.namingPollVote.findUnique({
+    // 既存の投票を確認
+    const existingVotes = await prisma.namingPollVote.findMany({
       where: {
-        pollId_userId: {
-          pollId: poll.id,
-          userId
-        }
+        pollId: poll.id,
+        userId
       }
     })
 
-    if (existingVote) {
+    // 既に2票投票済みの場合はエラー
+    if (existingVotes.length >= 2) {
       return NextResponse.json(
-        { error: '既に投票済みです' },
+        { error: '既に2票投票済みです' },
         { status: 400 }
       )
     }
+
+    // 次の投票番号を決定 (1票目 or 2票目)
+    const voteNumber = existingVotes.length + 1
 
     // 投票を記録
     const vote = await prisma.namingPollVote.create({
       data: {
         pollId: poll.id,
         optionId,
-        userId
+        userId,
+        voteNumber
       }
     })
 
-    return NextResponse.json({ success: true, vote })
+    return NextResponse.json({ success: true, vote, voteNumber })
   } catch (error) {
     console.error('Vote creation error:', error)
     return NextResponse.json(

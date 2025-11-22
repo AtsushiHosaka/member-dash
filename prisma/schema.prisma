@@ -157,13 +157,14 @@ model NamingPollOption {
 
 // 命名投票の投票記録
 model NamingPollVote {
-  id        String           @id @default(cuid())
-  pollId    String
-  poll      NamingPoll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  optionId  String
-  option    NamingPollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  userId    String
-  votedAt   DateTime         @default(now())
+  id         String           @id @default(cuid())
+  pollId     String
+  poll       NamingPoll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  optionId   String
+  option     NamingPollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  userId     String
+  voteNumber Int              // 1票目か2票目か (1 or 2)
+  votedAt    DateTime         @default(now())
 
-  @@unique([pollId, userId]) // 各ユーザーは1つの投票に1回のみ投票可能
+  @@unique([pollId, userId, voteNumber]) // 各ユーザーは1つの投票に2回まで投票可能
 }
