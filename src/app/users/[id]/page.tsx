@@ -9,6 +9,10 @@ import SessionDetailModal from '@/components/SessionDetailModal'
 import ManualSessionModal from '@/components/ManualSessionModal'
 import SessionEditModal from '@/components/SessionEditModal'
 import SessionHistoryModal from '@/components/SessionHistoryModal'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+
+// アバター絵文字一覧
+const AVATAR_EMOJIS = ['😀', '😎', '🤓', '😊', '🥳', '🤔', '😴', '🤖', '👻', '🦄']
 
 interface UserSession {
   id: string
@@ -88,10 +92,20 @@ export default function UserDetailPage() {
   const [editLoading, setEditLoading] = useState(false)
   const [currentTime, setCurrentTime] = useState(Date.now())
   const [mentorLoading, setMentorLoading] = useState(false)
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false)
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null)
+  const [avatarSaving, setAvatarSaving] = useState(false)
 
   useEffect(() => {
     fetchUserDetail()
   }, [userId])
+
+  // アバターモーダルが開かれたときに現在のアバターを設定
+  useEffect(() => {
+    if (isAvatarModalOpen) {
+      setSelectedAvatar(user?.avatar || null)
+    }
+  }, [isAvatarModalOpen, user?.avatar])
 
   // 現在開発中の場合、1秒ごとに時間を更新
   useEffect(() => {
@@ -110,9 +124,14 @@ export default function UserDetailPage() {
       if (response.ok) {
         const data = await response.json()
         setUser(data)
+      } else if (response.status === 401 || response.status === 403) {
+        // 認証エラーの場合はログインページに遷移
+        router.push('/login')
       }
     } catch (error) {
       console.error('Failed to fetch user detail:', error)
+      // エラーの場合もログインページに遷移
+      router.push('/login')
     } finally {
       setLoading(false)
     }
@@ -153,6 +172,49 @@ export default function UserDetailPage() {
 
   const isMentorAssigned = (mentorId: string) => {
     return user?.mentorLinks?.some(link => link.mentorId === mentorId) || false
+  }
+
+
+  const handleAvatarSave = async () => {
+    setAvatarSaving(true)
+    try {
+      const response = await fetch('/api/users/me', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: user?.name,
+          avatar: selectedAvatar,
+          courses: user?.courses,
+          schoolIds: user?.schoolLinks.map(link => link.school.id)
+        })
+      })
+
+      if (response.ok) {
+        toast({
+          title: "アイコン変更完了",
+          description: "アイコンを変更しました",
+        })
+        setIsAvatarModalOpen(false)
+        fetchUserDetail()
+      } else {
+        const error = await response.json()
+        toast({
+          title: "アイコン変更失敗",
+          description: error.error || 'アイコン変更に失敗しました',
+          variant: "destructive",
+        })
+      }
+    } catch (error: any) {
+      toast({
+        title: "アイコン変更失敗",
+        description: error.message || 'アイコン変更に失敗しました',
+        variant: "destructive",
+      })
+    } finally {
+      setAvatarSaving(false)
+    }
   }
 
   const formatDuration = (seconds: number) => {
@@ -380,18 +442,24 @@ export default function UserDetailPage() {
         {/* ユーザー情報 */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center gap-6">
-            <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-white text-3xl font-bold">
-              {user.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                user.name.charAt(0).toUpperCase()
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-3xl font-bold">
+                {user.avatar ? (
+                  <span className="text-4xl">{user.avatar}</span>
+                ) : (
+                  <span className="text-white">{user.name.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+              {(session?.user as any)?.id === userId && (
+                <button
+                  onClick={() => setIsAvatarModalOpen(true)}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  アイコンを編集
+                </button>
               )}
             </div>
-            <div>
+            <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900">{user.name}</h1>
               <p className="text-gray-600">@{user.userId}</p>
               <p className="text-sm text-gray-500">
@@ -399,6 +467,27 @@ export default function UserDetailPage() {
               </p>
             </div>
           </div>
+
+          {/* 獲得バッジ (自分のページの場合のみ表示) */}
+          {(session?.user as any)?.id === userId && user.userBadges && user.userBadges.length > 0 && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">獲得バッジ</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {user.userBadges.map((userBadge) => (
+                  <div
+                    key={userBadge.id}
+                    className={`p-3 rounded-lg border-2 ${getRarityColor(userBadge.badge.rarity)}`}
+                  >
+                    <div className="text-center">
+                      <div className="text-3xl mb-1">{userBadge.badge.icon}</div>
+                      <div className="text-xs font-semibold">{userBadge.badge.name}</div>
+                      <div className="text-xs mt-1">{getRarityName(userBadge.badge.rarity)}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* メンター設定 (mentor/admin のみ表示) */}
           {canManageMentor() && session?.user && (session.user as any).role === 'mentor' && (
@@ -570,6 +659,65 @@ export default function UserDetailPage() {
         onSubmit={handleManualSubmit}
         loading={manualLoading}
       />
+
+      {/* アイコン変更モーダル */}
+      <Dialog open={isAvatarModalOpen} onOpenChange={setIsAvatarModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>アイコンを変更</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedAvatar && (
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-3xl">{selectedAvatar}</span>
+                </div>
+                <span className="text-sm text-gray-600">選択中: {selectedAvatar}</span>
+              </div>
+            )}
+            <div className="grid grid-cols-5 gap-2 mb-4">
+              {AVATAR_EMOJIS.map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => setSelectedAvatar(emoji)}
+                  className={`text-4xl p-3 rounded-lg transition hover:bg-gray-100 ${
+                    selectedAvatar === emoji
+                      ? 'bg-blue-100 ring-2 ring-blue-500'
+                      : 'bg-gray-50'
+                  }`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+            {selectedAvatar && (
+              <button
+                type="button"
+                onClick={() => setSelectedAvatar(null)}
+                className="text-sm text-red-600 hover:text-red-800 mb-4"
+              >
+                クリア
+              </button>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={handleAvatarSave}
+                disabled={avatarSaving}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
+              >
+                {avatarSaving ? '保存中...' : '保存'}
+              </button>
+              <button
+                onClick={() => setIsAvatarModalOpen(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition"
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Menu, X, Users, School, Award, UserCircle, Ticket } from 'lucide-react'
+import { Menu, X, Users, School, Award, UserCircle, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -14,11 +14,13 @@ import {
 
 interface HeaderProps {
   userName: string
+  userId: string
   isAdmin: boolean
+  isMentor: boolean
   gachaTickets: number
 }
 
-export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps) {
+export default function Header({ userName, userId, isAdmin, isMentor, gachaTickets }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
@@ -33,11 +35,16 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
           { label: 'バッジ管理', icon: Award, path: '/admin/badges' },
         ]
       : []),
-    { label: 'アカウント設定', icon: UserCircle, path: '/account' },
+    { label: '設定', icon: Settings, path: '/settings' },
   ]
 
   const handleNavigation = (path: string) => {
     router.push(path)
+    closeMenu()
+  }
+
+  const handleUserNameClick = () => {
+    router.push(`/users/${userId}`)
     closeMenu()
   }
 
@@ -54,67 +61,14 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
           </button>
         </div>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* Desktop: User name and hamburger menu */}
+        <div className="flex items-center gap-3">
           <button
-            disabled
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed"
+            onClick={handleUserNameClick}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition"
           >
-            <Ticket className="w-4 h-4" />
-            ガチャ (実装中...)
-          </button>
-
-          {isAdmin && (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/admin/users')}
-                className={pathname === '/admin/users' ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : ''}
-              >
-                <Users className="w-4 h-4 mr-2" />
-                ユーザー管理
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/admin/schools')}
-                className={pathname === '/admin/schools' ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : ''}
-              >
-                <School className="w-4 h-4 mr-2" />
-                スクール管理
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/admin/badges')}
-                className={pathname === '/admin/badges' ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : ''}
-              >
-                <Award className="w-4 h-4 mr-2" />
-                バッジ管理
-              </Button>
-            </>
-          )}
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push('/account')}
-            className={pathname === '/account' ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : ''}
-          >
-            <UserCircle className="w-4 h-4 mr-2" />
+            <UserCircle className="w-4 h-4" />
             {userName}
-          </Button>
-        </div>
-
-        {/* Mobile Menu */}
-        <div className="md:hidden flex items-center gap-2">
-          <button
-            disabled
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed"
-          >
-            <Ticket className="w-3.5 h-3.5" />
-            実装中
           </button>
 
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -128,14 +82,17 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
                 <SheetTitle className="text-left">メニュー</SheetTitle>
               </SheetHeader>
               <div className="mt-6 space-y-1">
-                {/* User Info */}
-                <div className="px-3 py-4 bg-gray-50 rounded-lg mb-4">
+                {/* User Info - clickable */}
+                <button
+                  onClick={handleUserNameClick}
+                  className="w-full px-3 py-4 bg-gray-50 rounded-lg mb-4 hover:bg-gray-100 transition text-left"
+                >
                   <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
                     <UserCircle className="w-4 h-4" />
                     ログイン中
                   </div>
                   <div className="font-semibold text-gray-800">{userName}</div>
-                </div>
+                </button>
 
                 {/* Menu Items */}
                 {menuItems.map((item) => (
@@ -148,19 +105,6 @@ export default function Header({ userName, isAdmin, gachaTickets }: HeaderProps)
                     {item.label}
                   </button>
                 ))}
-
-                <button
-                  disabled
-                  className="w-full flex items-center justify-between gap-3 px-3 py-3 text-sm font-medium rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed"
-                >
-                  <div className="flex items-center gap-3">
-                    <Ticket className="w-5 h-5" />
-                    ガチャ
-                  </div>
-                  <span className="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-500">
-                    実装中...
-                  </span>
-                </button>
               </div>
             </SheetContent>
           </Sheet>

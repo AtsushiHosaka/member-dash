@@ -40,7 +40,18 @@ export default function GlobalHeader() {
   }
 
   const userName = session?.user?.name || ''
-  const isAdmin = (session?.user as any)?.role === 'admin'
+  const userId = (session?.user as any)?.id || ''
+  const userRole = (session?.user as any)?.role || 'member'
+  const isAdmin = userRole === 'admin'
+  const isMentor = userRole === 'mentor'
 
-  return <Header userName={userName} isAdmin={isAdmin} gachaTickets={gachaTickets} />
+  return (
+    <Header
+      userName={userName}
+      userId={userId}
+      isAdmin={isAdmin}
+      isMentor={isMentor}
+      gachaTickets={gachaTickets}
+    />
+  )
 }

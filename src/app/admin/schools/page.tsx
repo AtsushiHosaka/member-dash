@@ -28,9 +28,13 @@ export default function SchoolsAdminPage() {
       if (response.ok) {
         const data = await response.json()
         setSchools(data)
+      } else if (response.status === 401 || response.status === 403) {
+        // 認証エラーの場合はログインページに遷移
+        router.push('/login')
       }
     } catch (error) {
       console.error('Failed to fetch schools:', error)
+      router.push('/login')
     }
   }
 

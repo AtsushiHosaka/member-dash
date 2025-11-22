@@ -100,10 +100,16 @@ export default function Dashboard() {
   const fetchUserTickets = async () => {
     try {
       const response = await fetch('/api/user')
-      const data = await response.json()
-      setGachaTickets(data.gachaTickets || 0)
+      if (response.ok) {
+        const data = await response.json()
+        setGachaTickets(data.gachaTickets || 0)
+      } else if (response.status === 401 || response.status === 403) {
+        // 認証エラーの場合はログインページに遷移
+        router.push('/login')
+      }
     } catch (error) {
       console.error('Failed to fetch user tickets:', error)
+      router.push('/login')
     }
   }
 

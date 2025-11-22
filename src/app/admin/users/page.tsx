@@ -72,11 +72,13 @@ export default function UsersAdminPage() {
       if (response.ok) {
         const data = await response.json()
         setUsers(data)
-      } else if (response.status === 403) {
-        router.push('/')
+      } else if (response.status === 401 || response.status === 403) {
+        // 認証エラーの場合はログインページに遷移
+        router.push('/login')
       }
     } catch (error) {
       console.error('Failed to fetch users:', error)
+      router.push('/login')
     }
   }
 

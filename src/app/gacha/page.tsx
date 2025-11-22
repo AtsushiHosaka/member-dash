@@ -44,13 +44,16 @@ export default function GachaPage() {
       if (response.ok) {
         const data = await response.json()
         setTickets(data.gachaTickets || 0)
+      } else if (response.status === 401 || response.status === 403) {
+        // 認証エラーの場合はログインページに遷移
+        router.push('/login')
       } else {
         // ユーザーが見つからない場合は0枚として扱う
         setTickets(0)
       }
     } catch (error) {
       console.error('Failed to fetch user tickets:', error)
-      setTickets(0)
+      router.push('/login')
     }
   }
 

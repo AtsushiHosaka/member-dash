@@ -84,12 +84,16 @@ export default function AccountPage() {
         setAvatar(data.avatar)
         setSelectedCourses(data.courses || [])
         setSelectedSchools(data.schoolLinks.map((link: any) => link.schoolId))
+      } else if (response.status === 401 || response.status === 403) {
+        // 認証エラーの場合はログインページに遷移
+        router.push('/login')
       } else {
         alert('ユーザー情報の取得に失敗しました')
+        router.push('/login')
       }
     } catch (error) {
       console.error('Failed to fetch user data:', error)
-      alert('ユーザー情報の取得に失敗しました')
+      router.push('/login')
     } finally {
       setLoading(false)
     }
@@ -267,49 +271,7 @@ export default function AccountPage() {
     <div className="min-h-screen bg-gray-100">
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-bold mb-6">アカウント設定</h2>
-
-          {/* アイコン */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              アイコン絵文字
-            </label>
-            <div className="mb-4">
-              {avatar && (
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-3xl">{avatar}</span>
-                  </div>
-                  <span className="text-sm text-gray-600">選択中: {avatar}</span>
-                </div>
-              )}
-              <div className="grid grid-cols-5 gap-2">
-                {AVATAR_EMOJIS.map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    onClick={() => setAvatar(emoji)}
-                    className={`text-4xl p-3 rounded-lg transition hover:bg-gray-100 ${
-                      avatar === emoji
-                        ? 'bg-blue-100 ring-2 ring-blue-500'
-                        : 'bg-gray-50'
-                    }`}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-              {avatar && (
-                <button
-                  type="button"
-                  onClick={() => setAvatar(null)}
-                  className="mt-2 text-sm text-red-600 hover:text-red-800"
-                >
-                  クリア
-                </button>
-              )}
-            </div>
-          </div>
+          <h2 className="text-2xl font-bold mb-6">設定</h2>
 
           {/* 名前 */}
           <div className="mb-6">
@@ -390,14 +352,6 @@ export default function AccountPage() {
 
         </div>
 
-        {/* 獲得バッヂ */}
-        <div className="bg-white rounded-lg shadow-md p-8 mt-8">
-          <h2 className="text-2xl font-bold mb-6">獲得バッヂ</h2>
-          <div className="text-center py-8 text-gray-500">
-            現在実装中...
-          </div>
-        </div>
-
         {/* パスワード変更 */}
         <div className="bg-white rounded-lg shadow-md p-8 mt-8">
           <h2 className="text-2xl font-bold mb-6">パスワード変更</h2>
@@ -450,17 +404,16 @@ export default function AccountPage() {
               {changingPassword ? 'パスワード変更中...' : 'パスワードを変更'}
             </button>
           </div>
-        </div>
 
-        {/* ログアウト */}
-        <div className="bg-white rounded-lg shadow-md p-8 mt-8">
-          <h2 className="text-2xl font-bold mb-6">ログアウト</h2>
-          <button
-            onClick={handleLogout}
-            className="w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition"
-          >
-            ログアウト
-          </button>
+          {/* ログアウト */}
+          <div className="mt-8 pt-8 border-t border-gray-200">
+            <button
+              onClick={handleLogout}
+              className="w-full px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition"
+            >
+              ログアウト
+            </button>
+          </div>
         </div>
       </main>
     </div>

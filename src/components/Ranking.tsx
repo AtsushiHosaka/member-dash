@@ -72,7 +72,7 @@ export default function Ranking({ users, currentUserId, userSchools, onSchoolCha
         <p className="text-gray-500 text-center py-4">今週開発したメンバーはまだいません</p>
       ) : (
         <div className="space-y-3">
-          {users.map((user, index) => (
+          {users.map((user) => (
             <div
               key={user.id}
               onClick={() => handleUserClick(user.id)}
@@ -80,15 +80,6 @@ export default function Ranking({ users, currentUserId, userSchools, onSchoolCha
                 user.id === currentUserId ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 hover:bg-gray-100'
               }`}
             >
-              <div className="flex-shrink-0 w-8 text-center">
-                <span className="font-bold text-lg">
-                  {index === 0 && '🥇'}
-                  {index === 1 && '🥈'}
-                  {index === 2 && '🥉'}
-                  {index > 2 && `${index + 1}`}
-                </span>
-              </div>
-
               <div className="relative">
                 <div
                   className={`w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center font-bold ${
