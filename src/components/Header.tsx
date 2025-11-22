@@ -62,7 +62,7 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
             onClick={() => router.push('/')}
             className="text-2xl font-bold text-gray-800 hover:text-blue-600 transition"
           >
-            Dash β
+            Hash
           </button>
         </div>
 
