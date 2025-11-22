@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma'
 // 編集履歴を取得
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     // セッションの編集履歴を取得
     const history = await prisma.sessionEditHistory.findMany({

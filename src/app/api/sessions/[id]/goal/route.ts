@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma'
 // 目標を編集
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -16,7 +16,7 @@ export async function PATCH(
     }
 
     const userId = (session.user as any).id
-    const { id } = params
+    const { id } = await params
     const { goal } = await request.json()
 
     if (!goal || typeof goal !== 'string') {
