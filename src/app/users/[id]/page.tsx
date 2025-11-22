@@ -11,42 +11,19 @@ import SessionEditModal from '@/components/SessionEditModal'
 import SessionHistoryModal from '@/components/SessionHistoryModal'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
-// 利用可能なアイコン一覧（絵文字と画像パス）
-const AVAILABLE_ICONS = [
-  // 絵文字
-  { type: 'emoji', data: '😀' },
-  { type: 'emoji', data: '😎' },
-  { type: 'emoji', data: '🤓' },
-  { type: 'emoji', data: '😊' },
-  { type: 'emoji', data: '🥳' },
-  { type: 'emoji', data: '🤔' },
-  { type: 'emoji', data: '😴' },
-  { type: 'emoji', data: '🤖' },
-  { type: 'emoji', data: '👻' },
-  { type: 'emoji', data: '🦄' },
-  { type: 'emoji', data: '❤️' },
-  { type: 'emoji', data: '🚀' },
-  { type: 'emoji', data: '⭐' },
-  { type: 'emoji', data: '🏆' },
-  { type: 'emoji', data: '🔥' },
-  { type: 'emoji', data: '👍' },
-  { type: 'emoji', data: '✨' },
-  { type: 'emoji', data: '🌈' },
-  { type: 'emoji', data: '🍕' },
-  { type: 'emoji', data: '☕' },
-  { type: 'emoji', data: '📚' },
-  { type: 'emoji', data: '💻' },
-  { type: 'emoji', data: '🎮' },
-  { type: 'emoji', data: '🎵' },
-  { type: 'emoji', data: '⚽' },
-  { type: 'emoji', data: '🏀' },
-  { type: 'emoji', data: '📷' },
-  { type: 'emoji', data: '🎨' },
-  { type: 'emoji', data: '🐱' },
-  { type: 'emoji', data: '🐶' },
-  // 画像アイコン（例: public/icons/ 以下に配置した画像）
-  // { type: 'image', data: '/icons/example.png' },
+// デフォルトの絵文字アイコン一覧
+const DEFAULT_EMOJI_ICONS = [
+  '😀', '😎', '🤓', '😊', '🥳', '🤔', '😴', '🤖',
+  '👻', '🦄', '❤️', '🚀', '⭐', '🏆', '🔥', '👍',
+  '✨', '🌈', '🍕', '☕', '📚', '💻', '🎮', '🎵',
+  '⚽', '🏀', '📷', '🎨', '🐱', '🐶'
 ] as const
+
+interface AvailableBadge {
+  id: string
+  name: string
+  icon: string
+}
 
 interface UserSession {
   id: string
@@ -128,10 +105,18 @@ export default function UserDetailPage() {
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false)
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null)
   const [avatarSaving, setAvatarSaving] = useState(false)
+  const [availableBadges, setAvailableBadges] = useState<AvailableBadge[]>([])
 
   useEffect(() => {
     fetchUserDetail()
   }, [userId])
+
+  // アバターモーダルが開かれたときに利用可能なバッジを取得
+  useEffect(() => {
+    if (isAvatarModalOpen) {
+      fetchAvailableBadges()
+    }
+  }, [isAvatarModalOpen])
 
   // アバターモーダルが開かれたときに現在のアバターを設定
   useEffect(() => {
@@ -167,6 +152,18 @@ export default function UserDetailPage() {
       router.push('/login')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchAvailableBadges = async () => {
+    try {
+      const response = await fetch('/api/badges/available')
+      if (response.ok) {
+        const data = await response.json()
+        setAvailableBadges(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch available badges:', error)
     }
   }
 
@@ -682,26 +679,55 @@ export default function UserDetailPage() {
                 <span className="text-sm text-gray-600">選択中のアイコン</span>
               </div>
             )}
-            <div className="grid grid-cols-5 gap-2 mb-4">
-              {AVAILABLE_ICONS.map((icon, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => setSelectedAvatar(icon.data)}
-                  className={`p-3 rounded-lg transition hover:bg-gray-100 ${
-                    selectedAvatar === icon.data
-                      ? 'bg-blue-100 ring-2 ring-blue-500'
-                      : 'bg-gray-50'
-                  }`}
-                >
-                  {icon.type === 'emoji' ? (
-                    <span className="text-4xl">{icon.data}</span>
-                  ) : (
-                    <img src={icon.data} alt="Icon" className="w-12 h-12 object-cover rounded" />
-                  )}
-                </button>
-              ))}
+
+            {/* デフォルトの絵文字 */}
+            <div className="mb-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">絵文字</h4>
+              <div className="grid grid-cols-5 gap-2">
+                {DEFAULT_EMOJI_ICONS.map((emoji, index) => (
+                  <button
+                    key={`emoji-${index}`}
+                    type="button"
+                    onClick={() => setSelectedAvatar(emoji)}
+                    className={`p-3 rounded-lg transition hover:bg-gray-100 ${
+                      selectedAvatar === emoji
+                        ? 'bg-blue-100 ring-2 ring-blue-500'
+                        : 'bg-gray-50'
+                    }`}
+                  >
+                    <span className="text-4xl">{emoji}</span>
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {/* バッジアイコン */}
+            {availableBadges.length > 0 && (
+              <div className="mb-4">
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">バッジアイコン</h4>
+                <div className="grid grid-cols-5 gap-2">
+                  {availableBadges.map((badge) => (
+                    <button
+                      key={badge.id}
+                      type="button"
+                      onClick={() => setSelectedAvatar(badge.icon)}
+                      className={`p-3 rounded-lg transition hover:bg-gray-100 ${
+                        selectedAvatar === badge.icon
+                          ? 'bg-blue-100 ring-2 ring-blue-500'
+                          : 'bg-gray-50'
+                      }`}
+                      title={badge.name}
+                    >
+                      {badge.icon.startsWith('/') ? (
+                        <img src={badge.icon} alt={badge.name} className="w-12 h-12 object-cover rounded" />
+                      ) : (
+                        <span className="text-4xl">{badge.icon}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {selectedAvatar && (
               <button
                 type="button"
