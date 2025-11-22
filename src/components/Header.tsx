@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Menu, X, Users, School, Award, UserCircle, Settings } from 'lucide-react'
+import { Menu, X, Users, School, Award, UserCircle, Settings, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -110,6 +110,21 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
                     {item.label}
                   </button>
                 ))}
+
+                {/* Divider */}
+                <div className="border-t border-gray-200 my-3"></div>
+
+                {/* お問い合わせフォーム */}
+                <a
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSfFklaMUPlK98-JfHPVJW23MDKkjSE-5OHbllkidx4K6ZRSmg/viewform?usp=header"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={closeMenu}
+                  className="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  お問い合わせ
+                </a>
               </div>
             </SheetContent>
           </Sheet>
