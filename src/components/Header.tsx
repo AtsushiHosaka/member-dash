@@ -32,7 +32,6 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
       ? [
           { label: 'ユーザー管理', icon: Users, path: '/admin/users' },
           { label: 'スクール管理', icon: School, path: '/admin/schools' },
-          { label: 'バッジ管理', icon: Award, path: '/admin/badges' },
         ]
       : []),
     ...(isAdmin || isMentor

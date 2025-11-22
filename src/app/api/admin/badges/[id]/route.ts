@@ -100,7 +100,7 @@ export async function PATCH(
 
     if (icon !== undefined && (!icon || !icon.trim())) {
       return NextResponse.json(
-        { error: 'アイコンは必須です' },
+        { error: 'バッジ画像は必須です' },
         { status: 400 }
       )
     }

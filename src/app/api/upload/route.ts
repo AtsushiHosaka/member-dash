@@ -1,5 +1,12 @@
-import { put } from '@vercel/blob'
+import { v2 as cloudinary } from 'cloudinary'
 import { NextResponse } from 'next/server'
+
+// Cloudinary設定
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 export async function POST(request: Request) {
   try {
@@ -22,21 +29,38 @@ export async function POST(request: Request) {
       )
     }
 
-    // ファイルサイズの検証（5MB以下）
-    const maxSize = 5 * 1024 * 1024 // 5MB
+    // ファイルサイズの検証（2MB以下）
+    const maxSize = 2 * 1024 * 1024 // 2MB
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: 'ファイルサイズは5MB以下にしてください' },
+        { error: 'ファイルサイズは2MB以下にしてください' },
         { status: 400 }
       )
     }
 
-    // Vercel Blobにアップロード
-    const blob = await put(file.name, file, {
-      access: 'public',
+    // ファイルをBufferに変換
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+
+    // Cloudinaryにアップロード
+    const result = await new Promise<any>((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        {
+          folder: 'badges',
+          transformation: [
+            { width: 200, height: 200, crop: 'limit' }, // 最大200x200にリサイズ
+            { quality: 'auto' }, // 自動品質最適化
+            { fetch_format: 'auto' } // 自動フォーマット変換（WebPなど）
+          ]
+        },
+        (error, result) => {
+          if (error) reject(error)
+          else resolve(result)
+        }
+      ).end(buffer)
     })
 
-    return NextResponse.json({ url: blob.url })
+    return NextResponse.json({ url: result.secure_url })
   } catch (error) {
     console.error('Upload error:', error)
     return NextResponse.json(
