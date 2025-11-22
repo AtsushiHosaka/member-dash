@@ -347,6 +347,67 @@ export default function AccountPage() {
             </div>
           </div>
 
+          {/* アイコンを変更 */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-4">
+              アイコンを変更
+            </label>
+
+            {/* アイコン */}
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-gray-600 mb-2">
+                アイコン
+              </label>
+              <div className="grid grid-cols-4 gap-3">
+                {userData?.userBadges.map((userBadge) => (
+                  <button
+                    key={userBadge.badge.id}
+                    type="button"
+                    onClick={() => setAvatar(userBadge.badge.icon)}
+                    className={`aspect-square p-2 border-2 rounded-lg transition overflow-hidden ${
+                      avatar === userBadge.badge.icon
+                        ? 'border-blue-600 bg-blue-50'
+                        : 'border-gray-300 hover:border-blue-400'
+                    }`}
+                  >
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={userBadge.badge.icon}
+                        alt={userBadge.badge.name}
+                        fill
+                        sizes="(max-width: 768px) 25vw, 10vw"
+                        className="object-cover rounded"
+                      />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 絵文字 */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-2">
+                絵文字
+              </label>
+              <div className="grid grid-cols-5 gap-2">
+                {AVATAR_EMOJIS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => setAvatar(emoji)}
+                    className={`text-4xl p-3 border-2 rounded-lg transition ${
+                      avatar === emoji
+                        ? 'border-blue-600 bg-blue-50'
+                        : 'border-gray-300 hover:border-blue-400'
+                    }`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* ボタン */}
           <div className="flex gap-4">
             <button

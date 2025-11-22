@@ -701,28 +701,30 @@ export default function UserDetailPage() {
               </div>
             </div>
 
-            {/* バッジアイコン */}
+            {/* アイコン */}
             {availableBadges.length > 0 && (
               <div className="mb-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">バッジアイコン</h4>
-                <div className="grid grid-cols-5 gap-2">
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">アイコン</h4>
+                <div className="grid grid-cols-4 gap-3">
                   {availableBadges.map((badge) => (
                     <button
                       key={badge.id}
                       type="button"
                       onClick={() => setSelectedAvatar(badge.icon)}
-                      className={`p-3 rounded-lg transition hover:bg-gray-100 ${
+                      className={`aspect-square p-2 border-2 rounded-lg transition overflow-hidden ${
                         selectedAvatar === badge.icon
-                          ? 'bg-blue-100 ring-2 ring-blue-500'
-                          : 'bg-gray-50'
+                          ? 'border-blue-600 bg-blue-50'
+                          : 'border-gray-300 hover:border-blue-400'
                       }`}
                       title={badge.name}
                     >
-                      {badge.icon.startsWith('/') ? (
-                        <img src={badge.icon} alt={badge.name} className="w-12 h-12 object-cover rounded" />
-                      ) : (
-                        <span className="text-4xl">{badge.icon}</span>
-                      )}
+                      <div className="relative w-full h-full">
+                        <img
+                          src={badge.icon}
+                          alt={badge.name}
+                          className="absolute inset-0 w-full h-full object-cover rounded"
+                        />
+                      </div>
                     </button>
                   ))}
                 </div>

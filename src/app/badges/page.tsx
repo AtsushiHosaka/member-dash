@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { Edit2, X, Plus, Upload } from 'lucide-react'
+import { Edit2, X, Plus, Upload, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 
 interface Badge {
@@ -244,6 +244,34 @@ export default function BadgesPage() {
     setUploadedImageUrl(null)
   }
 
+  const handleDeleteBadge = async (badgeId: string, badgeName: string) => {
+    if (!confirm(`「${badgeName}」を削除してもよろしいですか？`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/badges/${badgeId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
+
+      if (response.ok) {
+        await fetchBadges()
+        alert('バッジを削除しました')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'バッジの削除に失敗しました')
+      }
+    } catch (error) {
+      console.error('Failed to delete badge:', error)
+      alert('バッジの削除に失敗しました')
+    }
+  }
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -276,19 +304,23 @@ export default function BadgesPage() {
                 key={badge.id}
                 className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50 relative"
               >
-                <button
-                  onClick={() => openEditModal(badge)}
-                  className="absolute top-3 right-3 p-2 hover:bg-gray-200 rounded-lg transition"
-                >
-                  <Edit2 className="w-4 h-4 text-gray-600" />
-                </button>
+                <div className="absolute top-3 right-3 flex gap-2">
+                  <button
+                    onClick={() => openEditModal(badge)}
+                    className="p-2 hover:bg-gray-200 rounded-lg transition"
+                  >
+                    <Edit2 className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteBadge(badge.id, badge.name)}
+                    className="p-2 hover:bg-red-100 rounded-lg transition"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-600" />
+                  </button>
+                </div>
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    {badge.icon.startsWith('http') || badge.icon.startsWith('/') ? (
-                      <Image src={badge.icon} alt={badge.name} width={64} height={64} className="w-16 h-16 object-cover rounded-lg" />
-                    ) : (
-                      <span className="text-4xl">{badge.icon}</span>
-                    )}
+                    <Image src={badge.icon} alt={badge.name} width={64} height={64} className="w-16 h-16 object-cover rounded-lg" />
                     <div>
                       <div className="font-semibold text-gray-900">{badge.name}</div>
                     </div>
