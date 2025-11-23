@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import Image from 'next/image'
 import { Menu, X, Users, School, Award, UserCircle, Settings, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -59,9 +60,16 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push('/')}
-            className="text-2xl font-bold text-gray-800 hover:text-blue-600 transition"
+            className="flex items-center gap-2 hover:opacity-80 transition"
           >
-            Hash
+            <Image
+              src="/favicon.png"
+              alt="Hash Logo"
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain"
+            />
+            <span className="text-2xl font-bold text-gray-800">Hash</span>
           </button>
         </div>
 

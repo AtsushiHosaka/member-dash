@@ -23,7 +23,8 @@ export default function ActiveMembers({ members }: ActiveMembersProps) {
     return `${hours}:${minutes}~`
   }
 
-  if (members.length === 0) {
+  // membersが配列でない場合やundefinedの場合の安全チェック
+  if (!members || !Array.isArray(members) || members.length === 0) {
     return null
   }
 
