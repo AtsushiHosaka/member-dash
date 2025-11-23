@@ -82,12 +82,16 @@ export default function Ranking({ users, currentUserId, userSchools, onSchoolCha
             >
               <div className="relative">
                 <div
-                  className={`w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center font-bold ${
+                  className={`w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center font-bold overflow-hidden ${
                     user.isActive ? 'ring-4 ring-green-400' : ''
                   }`}
                 >
                   {user.avatar ? (
-                    <span className="text-2xl">{user.avatar}</span>
+                    user.avatar.startsWith('/') || user.avatar.startsWith('http') ? (
+                      <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-2xl">{user.avatar}</span>
+                    )
                   ) : (
                     <span className="text-white">{user.name.charAt(0).toUpperCase()}</span>
                   )}
