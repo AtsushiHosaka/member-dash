@@ -25,7 +25,9 @@ export async function GET() {
         avatar: true,
         role: true,
         gachaTickets: true,
-        totalStudyHours: true
+        totalStudyHours: true,
+        seasonGoal: true,
+        seasonGoalExpiresAt: true
       }
     })
 
@@ -41,7 +43,9 @@ export async function GET() {
           avatar: true,
           role: true,
           gachaTickets: true,
-          totalStudyHours: true
+          totalStudyHours: true,
+          seasonGoal: true,
+          seasonGoalExpiresAt: true
         }
       })
     }

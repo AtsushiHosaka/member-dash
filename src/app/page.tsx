@@ -32,6 +32,9 @@ export default function Dashboard() {
   const [editedGoal, setEditedGoal] = useState('')
   const [showHistory, setShowHistory] = useState(false)
   const [editHistory, setEditHistory] = useState<any[]>([])
+  const [seasonGoal, setSeasonGoal] = useState<string | null>(null)
+  const [seasonGoalInput, setSeasonGoalInput] = useState('')
+  const [isSubmittingSeasonGoal, setIsSubmittingSeasonGoal] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -121,6 +124,18 @@ export default function Dashboard() {
       if (response.ok) {
         const data = await response.json()
         setGachaTickets(data.gachaTickets || 0)
+
+        // 今期の目標を設定（有効期限チェック）
+        if (data.seasonGoal && data.seasonGoalExpiresAt) {
+          const expiresAt = new Date(data.seasonGoalExpiresAt)
+          if (expiresAt > new Date()) {
+            setSeasonGoal(data.seasonGoal)
+          } else {
+            setSeasonGoal(null)
+          }
+        } else {
+          setSeasonGoal(null)
+        }
       } else if (response.status === 401 || response.status === 403) {
         // 認証エラーの場合はログインページに遷移
         router.push('/login')
@@ -314,6 +329,42 @@ export default function Dashboard() {
     setShowHistory(!showHistory)
   }
 
+  const handleSubmitSeasonGoal = async () => {
+    if (!seasonGoalInput.trim()) {
+      alert('今期の目標を入力してください')
+      return
+    }
+
+    setIsSubmittingSeasonGoal(true)
+    try {
+      const response = await fetch('/api/user/season-goal', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ seasonGoal: seasonGoalInput })
+      })
+
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login')
+        return
+      }
+
+      if (response.ok) {
+        const data = await response.json()
+        setSeasonGoal(data.seasonGoal)
+        setSeasonGoalInput('')
+      } else {
+        const error = await response.json()
+        alert(error.error || '今期の目標の設定に失敗しました')
+      }
+    } catch (error) {
+      alert('今期の目標の設定に失敗しました')
+    } finally {
+      setIsSubmittingSeasonGoal(false)
+    }
+  }
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -474,6 +525,42 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* 今期の目標 */}
+          {!activeSession && (
+            <div className="mb-8 max-w-2xl mx-auto">
+              {seasonGoal ? (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="text-sm font-medium text-blue-800 mb-2">
+                    今期の目標（2026/3/31まで）
+                  </div>
+                  <p className="text-blue-900 whitespace-pre-wrap">
+                    {seasonGoal}
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="text-sm font-medium text-gray-700 mb-3">
+                    今期の目標を設定しましょう（2026/3/31まで有効）
+                  </div>
+                  <textarea
+                    value={seasonGoalInput}
+                    onChange={(e) => setSeasonGoalInput(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none mb-3"
+                    rows={3}
+                    placeholder="今期の目標を入力してください"
+                  />
+                  <button
+                    onClick={handleSubmitSeasonGoal}
+                    disabled={isSubmittingSeasonGoal || !seasonGoalInput.trim()}
+                    className="w-full px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
+                  >
+                    {isSubmittingSeasonGoal ? '設定中...' : '目標を設定'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="flex justify-center">
             {!activeSession ? (
               <motion.button
@@ -535,6 +622,7 @@ export default function Dashboard() {
         onClose={() => setIsStartModalOpen(false)}
         onSubmit={handleSubmitGoal}
         loading={loading}
+        seasonGoal={seasonGoal}
       />
 
       <SessionModal

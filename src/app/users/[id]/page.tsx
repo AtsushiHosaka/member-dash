@@ -73,6 +73,8 @@ interface UserDetail {
   courses: string[]
   avatar: string | null
   role: string
+  seasonGoal: string | null
+  seasonGoalExpiresAt: string | null
   mentorLinks: MentorLink[]
   schoolLinks: Array<{
     school: {
@@ -106,6 +108,9 @@ export default function UserDetailPage() {
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null)
   const [avatarSaving, setAvatarSaving] = useState(false)
   const [availableBadges, setAvailableBadges] = useState<AvailableBadge[]>([])
+  const [seasonGoalInput, setSeasonGoalInput] = useState('')
+  const [isEditingSeasonGoal, setIsEditingSeasonGoal] = useState(false)
+  const [seasonGoalSaving, setSeasonGoalSaving] = useState(false)
 
   useEffect(() => {
     fetchUserDetail()
@@ -204,6 +209,51 @@ export default function UserDetailPage() {
     return user?.mentorLinks?.some(link => link.mentorId === mentorId) || false
   }
 
+
+  const handleSeasonGoalSubmit = async () => {
+    if (!seasonGoalInput.trim()) {
+      toast({
+        title: "入力エラー",
+        description: "今期の目標を入力してください",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setSeasonGoalSaving(true)
+    try {
+      const response = await fetch('/api/user/season-goal', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seasonGoal: seasonGoalInput })
+      })
+
+      if (response.ok) {
+        toast({
+          title: "設定完了",
+          description: "今期の目標を設定しました",
+        })
+        setIsEditingSeasonGoal(false)
+        setSeasonGoalInput('')
+        fetchUserDetail()
+      } else {
+        const error = await response.json()
+        toast({
+          title: "設定失敗",
+          description: error.error || '今期の目標の設定に失敗しました',
+          variant: "destructive",
+        })
+      }
+    } catch (error: any) {
+      toast({
+        title: "設定失敗",
+        description: error.message || '今期の目標の設定に失敗しました',
+        variant: "destructive",
+      })
+    } finally {
+      setSeasonGoalSaving(false)
+    }
+  }
 
   const handleAvatarSave = async () => {
     setAvatarSaving(true)
@@ -429,6 +479,10 @@ export default function UserDetailPage() {
   // 合計時間（完了 + 現在開発中）
   const totalDuration = completedDuration + activeDuration
 
+  // 今期の目標が有効かチェック
+  const isSeasonGoalValid = user.seasonGoal && user.seasonGoalExpiresAt && new Date(user.seasonGoalExpiresAt) > new Date()
+  const displaySeasonGoal = isSeasonGoalValid ? user.seasonGoal : null
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
@@ -539,34 +593,69 @@ export default function UserDetailPage() {
           </div>
         </div>
 
-        {/* 獲得バッヂ */}
-        <div className="bg-white rounded-lg shadow-md mb-6">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold">獲得バッヂ</h2>
-          </div>
+        {/* 今期の目標 */}
+        {(session?.user as any)?.id === userId && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">今期の目標（2026/3/31まで）</h3>
 
-          {user.userBadges.length === 0 ? (
-            <div className="px-6 py-8 text-center text-gray-500">
-              まだバッヂを獲得していません
-            </div>
-          ) : (
-            <div className="p-6">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {user.userBadges.map((userBadge) => (
-                  <div
-                    key={userBadge.id}
-                    className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition"
-                  >
-                    <div className="text-5xl mb-3">{userBadge.badge.icon}</div>
-                    <div className="text-sm font-semibold text-gray-900 text-center">
-                      {userBadge.badge.name}
-                    </div>
-                  </div>
-                ))}
+            {displaySeasonGoal && !isEditingSeasonGoal ? (
+              <div>
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-blue-900 whitespace-pre-wrap">{displaySeasonGoal}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setSeasonGoalInput(displaySeasonGoal || '')
+                    setIsEditingSeasonGoal(true)
+                  }}
+                  className="mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  目標を編集
+                </button>
               </div>
-            </div>
-          )}
-        </div>
+            ) : isEditingSeasonGoal ? (
+              <div>
+                <textarea
+                  value={seasonGoalInput}
+                  onChange={(e) => setSeasonGoalInput(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none mb-3"
+                  rows={3}
+                  placeholder="今期の目標を入力してください"
+                />
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSeasonGoalSubmit}
+                    disabled={seasonGoalSaving || !seasonGoalInput.trim()}
+                    className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
+                  >
+                    {seasonGoalSaving ? '保存中...' : '保存'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditingSeasonGoal(false)
+                      setSeasonGoalInput('')
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition"
+                  >
+                    キャンセル
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg mb-3">
+                  <p className="text-gray-500 text-sm">まだ今期の目標を設定していません</p>
+                </div>
+                <button
+                  onClick={() => setIsEditingSeasonGoal(true)}
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  目標を設定
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 開発履歴 */}
         <div className="bg-white rounded-lg shadow-md">

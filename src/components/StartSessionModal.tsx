@@ -7,9 +7,10 @@ interface StartSessionModalProps {
   onClose: () => void
   onSubmit: (goal: string) => void
   loading: boolean
+  seasonGoal?: string | null
 }
 
-export default function StartSessionModal({ isOpen, onClose, onSubmit, loading }: StartSessionModalProps) {
+export default function StartSessionModal({ isOpen, onClose, onSubmit, loading, seasonGoal }: StartSessionModalProps) {
   const [goal, setGoal] = useState('')
 
   if (!isOpen) return null
@@ -28,6 +29,18 @@ export default function StartSessionModal({ isOpen, onClose, onSubmit, loading }
         <h2 className="text-2xl font-bold mb-4">今日の目標を書こう！</h2>
 
         <form onSubmit={handleSubmit}>
+          {/* 今期の目標を表示 */}
+          {seasonGoal && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="text-xs font-medium text-blue-800 mb-1">
+                今期の目標
+              </div>
+              <p className="text-sm text-blue-900 whitespace-pre-wrap">
+                {seasonGoal}
+              </p>
+            </div>
+          )}
+
           <div className="mb-6">
             <label htmlFor="goal" className="block text-sm font-medium text-gray-700 mb-2">
               今日は何を達成したいですか？ <span className="text-red-600">*</span>

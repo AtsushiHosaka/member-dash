@@ -12,7 +12,15 @@ export async function GET(
 
     const user = await prisma.user.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        name: true,
+        courses: true,
+        avatar: true,
+        role: true,
+        seasonGoal: true,
+        seasonGoalExpiresAt: true,
         schoolLinks: {
           include: {
             school: true
@@ -59,10 +67,7 @@ export async function GET(
       )
     }
 
-    // パスワードを除外
-    const { password, ...userWithoutPassword } = user
-
-    return NextResponse.json(userWithoutPassword)
+    return NextResponse.json(user)
   } catch (error) {
     console.error('User fetch error:', error)
     return NextResponse.json(
