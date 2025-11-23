@@ -594,7 +594,7 @@ export default function UserDetailPage() {
         </div>
 
         {/* 今期の目標 */}
-        {(session?.user as any)?.id === userId && (
+        {(displaySeasonGoal || (session?.user as any)?.id === userId) && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">今期の目標（2026/3/31まで）</h3>
 
@@ -603,15 +603,17 @@ export default function UserDetailPage() {
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-blue-900 whitespace-pre-wrap">{displaySeasonGoal}</p>
                 </div>
-                <button
-                  onClick={() => {
-                    setSeasonGoalInput(displaySeasonGoal || '')
-                    setIsEditingSeasonGoal(true)
-                  }}
-                  className="mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  目標を編集
-                </button>
+                {(session?.user as any)?.id === userId && (
+                  <button
+                    onClick={() => {
+                      setSeasonGoalInput(displaySeasonGoal || '')
+                      setIsEditingSeasonGoal(true)
+                    }}
+                    className="mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    目標を編集
+                  </button>
+                )}
               </div>
             ) : isEditingSeasonGoal ? (
               <div>
