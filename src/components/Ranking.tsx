@@ -85,6 +85,7 @@ export default function Ranking({ users, currentUserId, userSchools, onSchoolCha
                   className={`w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center font-bold overflow-hidden ${
                     user.isActive ? 'ring-4 ring-green-400' : ''
                   }`}
+                  title={user.name}
                 >
                   {user.avatar ? (
                     user.avatar.startsWith('/') || user.avatar.startsWith('http') ? (

@@ -761,7 +761,7 @@ export default function UserDetailPage() {
             {selectedAvatar && (
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                  {selectedAvatar.startsWith('/') ? (
+                  {selectedAvatar.startsWith('/') || selectedAvatar.startsWith('http') ? (
                     <img src={selectedAvatar} alt="Selected" className="w-full h-full object-cover" />
                   ) : (
                     <span className="text-3xl">{selectedAvatar}</span>
