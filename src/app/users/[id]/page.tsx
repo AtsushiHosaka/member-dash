@@ -10,6 +10,7 @@ import ManualSessionModal from '@/components/ManualSessionModal'
 import SessionEditModal from '@/components/SessionEditModal'
 import SessionHistoryModal from '@/components/SessionHistoryModal'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import Avatar from '@/components/Avatar'
 
 // デフォルトの絵文字アイコン一覧
 const DEFAULT_EMOJI_ICONS = [
@@ -497,17 +498,11 @@ export default function UserDetailPage() {
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center gap-6">
             <div className="flex flex-col items-center gap-2">
-              <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-3xl font-bold overflow-hidden">
-                {user.avatar ? (
-                  user.avatar.startsWith('/') ? (
-                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-4xl">{user.avatar}</span>
-                  )
-                ) : (
-                  <span className="text-white">{user.name.charAt(0).toUpperCase()}</span>
-                )}
-              </div>
+              <Avatar
+                avatar={user.avatar}
+                name={user.name}
+                size="xl"
+              />
               {(session?.user as any)?.id === userId && (
                 <button
                   onClick={() => setIsAvatarModalOpen(true)}

@@ -1,12 +1,14 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import Avatar from './Avatar'
 
 interface ActiveMember {
   id: string
   name: string
   courses: string[]
   avatar: string | null
+  avatarBadgeName?: string | null
   startTime: string
 }
 
@@ -45,19 +47,14 @@ export default function ActiveMembers({ members }: ActiveMembersProps) {
               style={{ minWidth: '120px' }}
             >
               {/* アイコン */}
-              <div
-                className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center font-bold ring-4 ring-green-400 mb-2 overflow-hidden"
-                title={member.name}
-              >
-                {member.avatar ? (
-                  member.avatar.startsWith('/') || member.avatar.startsWith('http') ? (
-                    <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-4xl">{member.avatar}</span>
-                  )
-                ) : (
-                  <span className="text-white text-2xl">{member.name.charAt(0).toUpperCase()}</span>
-                )}
+              <div className="mb-2">
+                <Avatar
+                  avatar={member.avatar}
+                  name={member.name}
+                  size="xl"
+                  isActive={true}
+                  badgeName={member.avatarBadgeName}
+                />
               </div>
 
               {/* 開発開始時間 */}

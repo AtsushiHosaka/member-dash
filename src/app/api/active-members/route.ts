@@ -14,6 +14,12 @@ export async function GET(request: Request) {
     const schools = (session.user as any).schools || []
     const schoolIds = schools.map((school: any) => school.id)
 
+    // バッジ一覧を取得（アバターのバッジ名解決用）
+    const allBadges = await prisma.badge.findMany({
+      select: { icon: true, name: true }
+    })
+    const badgeNameMap = new Map(allBadges.map(b => [b.icon, b.name]))
+
     // 同じスクールのアクティブなセッションを持つユーザーを取得（複数校舎対応）
     const activeSessions = await prisma.session.findMany({
       where: {
@@ -54,6 +60,7 @@ export async function GET(request: Request) {
         name: link.school.name
       })),
       avatar: session.user.avatar,
+      avatarBadgeName: session.user.avatar ? badgeNameMap.get(session.user.avatar) || null : null,
       startTime: session.startTime.toISOString()
     }))
 

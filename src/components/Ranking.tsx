@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import Avatar from './Avatar'
 
 interface School {
   id: string
@@ -13,6 +14,7 @@ interface RankingUser {
   name: string
   courses: string[]
   avatar: string | null
+  avatarBadgeName?: string | null
   daysCount: number
   isActive: boolean
 }
@@ -80,27 +82,14 @@ export default function Ranking({ users, currentUserId, userSchools, onSchoolCha
                 user.id === currentUserId ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 hover:bg-gray-100'
               }`}
             >
-              <div className="relative">
-                <div
-                  className={`w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center font-bold overflow-hidden ${
-                    user.isActive ? 'ring-4 ring-green-400' : ''
-                  }`}
-                  title={user.name}
-                >
-                  {user.avatar ? (
-                    user.avatar.startsWith('/') || user.avatar.startsWith('http') ? (
-                      <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-2xl">{user.avatar}</span>
-                    )
-                  ) : (
-                    <span className="text-white">{user.name.charAt(0).toUpperCase()}</span>
-                  )}
-                </div>
-                {user.isActive && (
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
-                )}
-              </div>
+              <Avatar
+                avatar={user.avatar}
+                name={user.name}
+                size="md"
+                isActive={user.isActive}
+                showActiveIndicator={user.isActive}
+                badgeName={user.avatarBadgeName}
+              />
 
               <div className="flex-1">
                 <div className="font-semibold">

@@ -1,12 +1,14 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import Avatar from './Avatar'
 
 interface MentorMember {
   id: string
   userId: string
   name: string
   avatar: string | null
+  avatarBadgeName?: string | null
   courses: string[]
   schools: string[]
   isActive: boolean
@@ -51,17 +53,15 @@ export default function MentorMembers({ members }: MentorMembersProps) {
           >
             <div className="flex items-center gap-4 flex-1 min-w-0">
               {/* アバター */}
-              <div className={`relative flex-shrink-0 ${member.isActive ? 'ring-4 ring-green-400 rounded-full' : ''}`}>
-                <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-white text-lg font-bold">
-                  {member.avatar ? (
-                    <span className="text-2xl">{member.avatar}</span>
-                  ) : (
-                    member.name.charAt(0).toUpperCase()
-                  )}
-                </div>
-                {member.isActive && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
-                )}
+              <div className="flex-shrink-0">
+                <Avatar
+                  avatar={member.avatar}
+                  name={member.name}
+                  size="md"
+                  isActive={member.isActive}
+                  showActiveIndicator={member.isActive}
+                  badgeName={member.avatarBadgeName}
+                />
               </div>
 
               {/* 情報 */}

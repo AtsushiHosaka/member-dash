@@ -23,6 +23,12 @@ export async function GET(request: Request) {
       )
     }
 
+    // バッジ一覧を取得（アバターのバッジ名解決用）
+    const allBadges = await prisma.badge.findMany({
+      select: { icon: true, name: true }
+    })
+    const badgeNameMap = new Map(allBadges.map(b => [b.icon, b.name]))
+
     // メンターの担当メンバーを取得（多対多対応）
     const mentorMemberLinks = await prisma.mentorMember.findMany({
       where: {
@@ -104,6 +110,7 @@ export async function GET(request: Request) {
           userId: member.userId,
           name: member.name,
           avatar: member.avatar,
+          avatarBadgeName: member.avatar ? badgeNameMap.get(member.avatar) || null : null,
           courses: member.courses,
           schools: member.schoolLinks.map(link => link.school.name),
           isActive: member.sessions.length > 0,

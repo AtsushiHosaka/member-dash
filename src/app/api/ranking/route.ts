@@ -78,6 +78,12 @@ export async function GET(request: Request) {
     const schoolDayOfWeek = getSchoolDayOfWeek(primarySchool.name)
     const { start: weekStart, end: weekEnd } = getSchoolWeekRange(schoolDayOfWeek)
 
+    // バッジ一覧を取得（アバターのバッジ名解決用）
+    const allBadges = await prisma.badge.findMany({
+      select: { icon: true, name: true }
+    })
+    const badgeNameMap = new Map(allBadges.map(b => [b.icon, b.name]))
+
     // 同じスクールに属するユーザーを取得（複数校舎対応）
     const users = await prisma.user.findMany({
       where: {
@@ -143,6 +149,7 @@ export async function GET(request: Request) {
           name: link.school.name
         })),
         avatar: user.avatar,
+        avatarBadgeName: user.avatar ? badgeNameMap.get(user.avatar) || null : null,
         daysCount,
         isActive: isCurrentlyActive
       }
