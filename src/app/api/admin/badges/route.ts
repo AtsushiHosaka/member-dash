@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { name, icon, isPublic, allowedUserIds } = body
+    const { name, icon, rarity, isPublic, allowedUserIds } = body
 
     // バリデーション
     if (!name || !name.trim()) {
@@ -80,10 +80,15 @@ export async function POST(request: Request) {
       )
     }
 
+    // レアリティのバリデーション
+    const validRarities = ['common', 'rare', 'epic', 'legendary']
+    const badgeRarity = validRarities.includes(rarity) ? rarity : 'common'
+
     const badge = await prisma.badge.create({
       data: {
         name: name.trim(),
         icon: icon.trim(),
+        rarity: badgeRarity,
         isPublic: isPublic !== undefined ? isPublic : true,
         allowedUserIds: allowedUserIds || []
       }

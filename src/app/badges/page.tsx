@@ -10,6 +10,7 @@ interface Badge {
   id: string
   name: string
   icon: string
+  rarity: 'common' | 'rare' | 'epic' | 'legendary'
   isPublic: boolean
   allowedUserIds: string[]
   createdAt: string
@@ -24,6 +25,17 @@ interface User {
   name: string
 }
 
+const RARITY_OPTIONS = [
+  { value: 'common', label: 'コモン (60%)', color: 'bg-gray-200 text-gray-800' },
+  { value: 'rare', label: 'レア (25%)', color: 'bg-blue-200 text-blue-800' },
+  { value: 'epic', label: 'エピック (12%)', color: 'bg-purple-200 text-purple-800' },
+  { value: 'legendary', label: 'レジェンダリー (3%)', color: 'bg-yellow-200 text-yellow-800' }
+]
+
+const getRarityOption = (rarity: string) => {
+  return RARITY_OPTIONS.find(o => o.value === rarity) || RARITY_OPTIONS[0]
+}
+
 export default function BadgesPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -33,6 +45,7 @@ export default function BadgesPage() {
   const [editingBadge, setEditingBadge] = useState<Badge | null>(null)
   const [editForm, setEditForm] = useState({
     name: '',
+    rarity: 'common' as 'common' | 'rare' | 'epic' | 'legendary',
     isPublic: true,
     allowedUserIds: [] as string[]
   })
@@ -41,6 +54,7 @@ export default function BadgesPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [newBadgeForm, setNewBadgeForm] = useState({
     name: '',
+    rarity: 'common' as 'common' | 'rare' | 'epic' | 'legendary',
     isPublic: true,
     allowedUserIds: [] as string[]
   })
@@ -97,6 +111,7 @@ export default function BadgesPage() {
     setEditingBadge(badge)
     setEditForm({
       name: badge.name,
+      rarity: badge.rarity || 'common',
       isPublic: badge.isPublic,
       allowedUserIds: badge.allowedUserIds
     })
@@ -106,6 +121,7 @@ export default function BadgesPage() {
     setEditingBadge(null)
     setEditForm({
       name: '',
+      rarity: 'common',
       isPublic: true,
       allowedUserIds: []
     })
@@ -120,6 +136,7 @@ export default function BadgesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: editForm.name,
+          rarity: editForm.rarity,
           isPublic: editForm.isPublic,
           allowedUserIds: editForm.allowedUserIds
         })
@@ -207,6 +224,7 @@ export default function BadgesPage() {
         body: JSON.stringify({
           name: newBadgeForm.name,
           icon: uploadedImageUrl,
+          rarity: newBadgeForm.rarity,
           isPublic: newBadgeForm.isPublic,
           allowedUserIds: newBadgeForm.allowedUserIds
         })
@@ -238,6 +256,7 @@ export default function BadgesPage() {
     setIsAddModalOpen(false)
     setNewBadgeForm({
       name: '',
+      rarity: 'common',
       isPublic: true,
       allowedUserIds: []
     })
@@ -326,14 +345,17 @@ export default function BadgesPage() {
                     </div>
                   </div>
                 </div>
-                <div className="text-xs text-gray-600">
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className={`px-2 py-1 rounded ${getRarityOption(badge.rarity).color}`}>
+                    {getRarityOption(badge.rarity).label}
+                  </span>
                   {badge.isPublic ? (
                     <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
-                      公開バッジ
+                      公開
                     </span>
                   ) : (
                     <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded">
-                      限定バッジ ({badge.allowedUserIds?.length || 0}人)
+                      限定 ({badge.allowedUserIds?.length || 0}人)
                     </span>
                   )}
                 </div>
@@ -369,6 +391,35 @@ export default function BadgesPage() {
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
+                  </div>
+
+                  {/* レアリティ */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      レアリティ（ガチャ出現率）
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {RARITY_OPTIONS.map((option) => (
+                        <label
+                          key={option.value}
+                          className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition ${
+                            editForm.rarity === option.value
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            checked={editForm.rarity === option.value}
+                            onChange={() => setEditForm({ ...editForm, rarity: option.value as any })}
+                            className="w-4 h-4"
+                          />
+                          <span className={`px-2 py-0.5 rounded text-xs ${option.color}`}>
+                            {option.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
                   {/* 公開設定 */}
@@ -529,6 +580,35 @@ export default function BadgesPage() {
                       placeholder="例: 初めての開発"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
+                  </div>
+
+                  {/* レアリティ */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      レアリティ（ガチャ出現率）
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {RARITY_OPTIONS.map((option) => (
+                        <label
+                          key={option.value}
+                          className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition ${
+                            newBadgeForm.rarity === option.value
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            checked={newBadgeForm.rarity === option.value}
+                            onChange={() => setNewBadgeForm({ ...newBadgeForm, rarity: option.value as any })}
+                            className="w-4 h-4"
+                          />
+                          <span className={`px-2 py-0.5 rounded text-xs ${option.color}`}>
+                            {option.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
                   {/* 公開設定 */}

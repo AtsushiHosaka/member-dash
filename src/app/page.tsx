@@ -11,6 +11,7 @@ import StartSessionModal from '@/components/StartSessionModal'
 import Ranking from '@/components/Ranking'
 import ActiveMembers from '@/components/ActiveMembers'
 import MentorMembers from '@/components/MentorMembers'
+import ChristmasLoginBonusModal from '@/components/ChristmasLoginBonusModal'
 // import NamingPoll from '@/components/NamingPoll'
 
 export default function Dashboard() {
@@ -35,6 +36,8 @@ export default function Dashboard() {
   const [seasonGoal, setSeasonGoal] = useState<string | null>(null)
   const [seasonGoalInput, setSeasonGoalInput] = useState('')
   const [isSubmittingSeasonGoal, setIsSubmittingSeasonGoal] = useState(false)
+  const [showChristmasBonus, setShowChristmasBonus] = useState(false)
+  const [christmasBonusChecked, setChristmasBonusChecked] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -63,8 +66,29 @@ export default function Dashboard() {
       if (role === 'mentor' || role === 'admin') {
         fetchMentorMembers()
       }
+
+      // クリスマスログインボーナスをチェック
+      checkChristmasBonus()
     }
   }, [status, session])
+
+  const checkChristmasBonus = async () => {
+    if (christmasBonusChecked) return
+    setChristmasBonusChecked(true)
+
+    try {
+      const response = await fetch('/api/christmas-bonus')
+      if (response.ok) {
+        const data = await response.json()
+        // イベント期間中で、まだ今日のボーナスを受け取っていない場合
+        if (data.isEventPeriod && !data.alreadyClaimed) {
+          setShowChristmasBonus(true)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to check Christmas bonus:', error)
+    }
+  }
 
   const fetchActiveSession = async () => {
     try {
@@ -631,6 +655,14 @@ export default function Dashboard() {
         onSubmit={handleSubmitSession}
         loading={loading}
         goal={activeSession?.goal}
+      />
+
+      <ChristmasLoginBonusModal
+        isOpen={showChristmasBonus}
+        onClose={() => {
+          setShowChristmasBonus(false)
+          fetchUserTickets() // チケット数を更新
+        }}
       />
     </div>
   )
