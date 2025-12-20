@@ -120,6 +120,8 @@ model Badge {
   id             String      @id @default(cuid())
   name           String      // バッジ名
   icon           String      // アイコン（絵文字または画像パス）
+  rarity         String      @default("common") // レアリティ: common, rare, epic, legendary
+  isGachaPrize   Boolean     @default(true) // ガチャで出現するかどうか
   isPublic       Boolean     @default(true) // 誰にでも表示されるか
   allowedUserIds String[]    @default([]) // 特定ユーザーのみの場合、許可されたユーザーIDリスト
   userBadges     UserBadge[]
@@ -135,6 +137,20 @@ model UserBadge {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   badge      Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
   obtainedAt DateTime @default(now())
+}
+
+// 12月ログインボーナス（クリスマスイベント）
+model ChristmasLoginBonus {
+  id                String   @id @default(cuid())
+  userId            String
+  year              Int      // 2024, 2025など
+  loginDate         DateTime // ログインした日（日付のみ、時間は00:00:00）
+  consecutiveDays   Int      // その時点での継続ログイン日数
+  ticketsEarned     Int      // その日に獲得したチケット枚数
+  createdAt         DateTime @default(now())
+
+  @@unique([userId, year, loginDate]) // 同じユーザーが同じ日に複数回ボーナスを受け取れないように
+  @@index([userId, year])
 }
 
 // 命名投票

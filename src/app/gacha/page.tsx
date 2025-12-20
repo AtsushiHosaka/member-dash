@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 interface Badge {
   id: string
@@ -45,10 +46,8 @@ export default function GachaPage() {
         const data = await response.json()
         setTickets(data.gachaTickets || 0)
       } else if (response.status === 401 || response.status === 403) {
-        // 認証エラーの場合はログインページに遷移
         router.push('/login')
       } else {
-        // ユーザーが見つからない場合は0枚として扱う
         setTickets(0)
       }
     } catch (error) {
@@ -69,7 +68,7 @@ export default function GachaPage() {
 
     try {
       // アニメーション効果のために少し待つ
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 300))
 
       const response = await fetch('/api/gacha/draw', {
         method: 'POST'
@@ -89,7 +88,7 @@ export default function GachaPage() {
         // アニメーション完了後に結果を表示
         setTimeout(() => {
           setIsAnimating(false)
-        }, 500)
+        }, 300)
       } else {
         alert(data.error || 'ガチャの実行に失敗しました')
         setIsAnimating(false)
@@ -161,18 +160,32 @@ export default function GachaPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-          <div className="text-center mb-8">
-            <div className="text-6xl mb-4">🎫</div>
-            <div className="text-4xl font-bold text-gray-800 mb-2">
-              {tickets}枚
+          {/* ガチャ画像 */}
+          <div className="flex justify-center mb-6">
+            <div className={`transition-transform duration-300 ${isAnimating ? 'animate-shake' : ''}`}>
+              <Image
+                src="/gacha.png"
+                alt="ガチャ"
+                width={200}
+                height={200}
+                className="object-contain"
+                priority
+              />
+            </div>
+          </div>
+
+          <div className="text-center mb-6">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="text-3xl">🎫</span>
+              <span className="text-4xl font-bold text-gray-800">{tickets}枚</span>
             </div>
             <div className="text-sm text-gray-600">
               所持ガチャ券
             </div>
           </div>
 
-          <div className="text-center mb-8">
-            <p className="text-sm text-gray-600 mb-4">
+          <div className="text-center mb-6">
+            <p className="text-sm text-gray-600">
               開発時間3時間ごとにガチャ券を1枚獲得できます
             </p>
           </div>
@@ -200,15 +213,24 @@ export default function GachaPage() {
         {!isAnimating && result && (
           <div className="bg-white rounded-lg shadow-md p-8 mb-8 animate-fade-in">
             <div className="text-center">
-              <div className="text-8xl mb-4">{result.icon}</div>
+              <div className="mb-4">
+                {result.icon.startsWith('/') || result.icon.startsWith('http') ? (
+                  <Image
+                    src={result.icon}
+                    alt={result.name}
+                    width={128}
+                    height={128}
+                    className="mx-auto rounded-lg"
+                  />
+                ) : (
+                  <span className="text-8xl">{result.icon}</span>
+                )}
+              </div>
               <div className="text-3xl font-bold text-gray-800 mb-4">
                 {result.name}
               </div>
-              <div className={`inline-block px-4 py-2 rounded-full text-sm font-bold mb-4 ${getRarityColor(result.rarity)}`}>
+              <div className={`inline-block px-4 py-2 rounded-full text-sm font-bold ${getRarityColor(result.rarity)}`}>
                 {getRarityName(result.rarity)}
-              </div>
-              <div className="text-lg text-gray-600 mt-4">
-                おめでとうございます！
               </div>
             </div>
           </div>
@@ -244,6 +266,24 @@ export default function GachaPage() {
           </div>
         </div>
       </main>
+
+      <style jsx>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0) rotate(0deg); }
+          10% { transform: translateX(-5px) rotate(-5deg); }
+          20% { transform: translateX(5px) rotate(5deg); }
+          30% { transform: translateX(-5px) rotate(-3deg); }
+          40% { transform: translateX(5px) rotate(3deg); }
+          50% { transform: translateX(-3px) rotate(-2deg); }
+          60% { transform: translateX(3px) rotate(2deg); }
+          70% { transform: translateX(-2px) rotate(-1deg); }
+          80% { transform: translateX(2px) rotate(1deg); }
+          90% { transform: translateX(-1px) rotate(0deg); }
+        }
+        .animate-shake {
+          animation: shake 0.6s ease-in-out;
+        }
+      `}</style>
     </div>
   )
 }
