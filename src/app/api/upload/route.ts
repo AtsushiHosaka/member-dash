@@ -1,5 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary'
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 // Cloudinary設定
 cloudinary.config({
@@ -10,12 +12,35 @@ cloudinary.config({
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user) {
+      return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+    }
+
+    const userRole = (session.user as any).role
+
+    if (userRole !== 'admin' && userRole !== 'mentor') {
+      return NextResponse.json(
+        { error: '管理者またはメンター権限が必要です' },
+        { status: 403 }
+      )
+    }
+
     const formData = await request.formData()
     const file = formData.get('file') as File
 
     if (!file) {
       return NextResponse.json(
         { error: 'ファイルが必要です' },
+        { status: 400 }
+      )
+    }
+
+    // ファイル名がある場合のみ処理
+    if (!file.name || file.size === 0) {
+      return NextResponse.json(
+        { error: '有効なファイルを選択してください' },
         { status: 400 }
       )
     }
@@ -61,10 +86,10 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json({ url: result.secure_url })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Upload error:', error)
     return NextResponse.json(
-      { error: 'アップロードエラー' },
+      { error: error?.message || 'アップロードエラー' },
       { status: 500 }
     )
   }

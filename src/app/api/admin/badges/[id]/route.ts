@@ -76,7 +76,7 @@ export async function PATCH(
 
     const { id } = await params
     const body = await request.json()
-    const { name, icon, rarity, isPublic, allowedUserIds } = body
+    const { name, icon, rarity, isGachaPrize, isPublic, allowedUserIds } = body
 
     // バッジが存在するか確認
     const badge = await prisma.badge.findUnique({
@@ -116,6 +116,7 @@ export async function PATCH(
         ...(name !== undefined && { name: name.trim() }),
         ...(icon !== undefined && { icon: icon.trim() }),
         ...(validatedRarity !== undefined && { rarity: validatedRarity }),
+        ...(isGachaPrize !== undefined && { isGachaPrize }),
         ...(isPublic !== undefined && { isPublic }),
         ...(allowedUserIds !== undefined && { allowedUserIds })
       }

@@ -121,6 +121,7 @@ model Badge {
   name           String      // バッジ名
   icon           String      // アイコン（絵文字または画像パス）
   rarity         String      @default("common") // レアリティ: common, rare, epic, legendary
+  isGachaPrize   Boolean     @default(true) // ガチャで出現するかどうか
   isPublic       Boolean     @default(true) // 誰にでも表示されるか
   allowedUserIds String[]    @default([]) // 特定ユーザーのみの場合、許可されたユーザーIDリスト
   userBadges     UserBadge[]

@@ -70,7 +70,9 @@ export async function POST() {
         where: { id: userId },
         select: { gachaTickets: true }
       }),
-      prisma.badge.findMany()
+      prisma.badge.findMany({
+        where: { isGachaPrize: true }
+      })
     ])
 
     if (!user) {

@@ -3,16 +3,13 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// クリスマスイベント期間（12/6〜12/25）
-const EVENT_START_MONTH = 12
-const EVENT_START_DAY = 6
-const EVENT_END_DAY = 25
+// イベント期間（2025/12/20〜2026/1/10）
+const EVENT_START = new Date('2025-12-20T00:00:00+09:00')
+const EVENT_END = new Date('2026-01-10T23:59:59+09:00')
 
 // イベント期間内かどうかをチェック
 function isEventPeriod(date: Date): boolean {
-  const month = date.getMonth() + 1 // 0-indexed
-  const day = date.getDate()
-  return month === EVENT_START_MONTH && day >= EVENT_START_DAY && day <= EVENT_END_DAY
+  return date >= EVENT_START && date <= EVENT_END
 }
 
 // 日付を00:00:00に正規化（日本時間）

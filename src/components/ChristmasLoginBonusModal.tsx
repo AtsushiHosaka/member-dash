@@ -68,7 +68,7 @@ export default function ChristmasLoginBonusModal({ isOpen, onClose }: ChristmasL
           <h2 className="text-2xl font-bold text-red-700">
             クリスマスログインボーナス
           </h2>
-          <p className="text-sm text-gray-600 mt-1">12/6〜12/25 限定イベント</p>
+          <p className="text-sm text-gray-600 mt-1">12/20〜1/10 限定イベント</p>
         </div>
 
         {loading ? (

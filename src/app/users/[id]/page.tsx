@@ -11,6 +11,7 @@ import SessionEditModal from '@/components/SessionEditModal'
 import SessionHistoryModal from '@/components/SessionHistoryModal'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import Avatar from '@/components/Avatar'
+import Image from 'next/image'
 
 // デフォルトの絵文字アイコン一覧
 const DEFAULT_EMOJI_ICONS = [
@@ -532,7 +533,19 @@ export default function UserDetailPage() {
                     className="p-3 rounded-lg border-2 bg-gray-100 border-gray-300"
                   >
                     <div className="text-center">
-                      <div className="text-3xl mb-1">{userBadge.badge.icon}</div>
+                      <div className="mb-1 flex justify-center">
+                        {userBadge.badge.icon.startsWith('/') || userBadge.badge.icon.startsWith('http') ? (
+                          <Image
+                            src={userBadge.badge.icon}
+                            alt={userBadge.badge.name}
+                            width={48}
+                            height={48}
+                            className="rounded"
+                          />
+                        ) : (
+                          <span className="text-3xl">{userBadge.badge.icon}</span>
+                        )}
+                      </div>
                       <div className="text-xs font-semibold">{userBadge.badge.name}</div>
                     </div>
                   </div>

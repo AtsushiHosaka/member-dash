@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { name, icon, rarity, isPublic, allowedUserIds } = body
+    const { name, icon, rarity, isGachaPrize, isPublic, allowedUserIds } = body
 
     // バリデーション
     if (!name || !name.trim()) {
@@ -89,6 +89,7 @@ export async function POST(request: Request) {
         name: name.trim(),
         icon: icon.trim(),
         rarity: badgeRarity,
+        isGachaPrize: isGachaPrize !== undefined ? isGachaPrize : true,
         isPublic: isPublic !== undefined ? isPublic : true,
         allowedUserIds: allowedUserIds || []
       }

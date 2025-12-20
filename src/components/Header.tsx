@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
-import { Menu, X, Users, School, Award, UserCircle, Settings, MessageCircle } from 'lucide-react'
+import { Menu, X, Users, School, Award, UserCircle, Settings, MessageCircle, Ticket } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -29,6 +29,7 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
   const closeMenu = () => setIsOpen(false)
 
   const menuItems = [
+    { label: 'ガチャ', icon: Ticket, path: '/gacha' },
     ...(isAdmin
       ? [
           { label: 'ユーザー管理', icon: Users, path: '/admin/users' },

@@ -11,6 +11,7 @@ interface Badge {
   name: string
   icon: string
   rarity: 'common' | 'rare' | 'epic' | 'legendary'
+  isGachaPrize: boolean
   isPublic: boolean
   allowedUserIds: string[]
   createdAt: string
@@ -46,6 +47,7 @@ export default function BadgesPage() {
   const [editForm, setEditForm] = useState({
     name: '',
     rarity: 'common' as 'common' | 'rare' | 'epic' | 'legendary',
+    isGachaPrize: true,
     isPublic: true,
     allowedUserIds: [] as string[]
   })
@@ -55,6 +57,7 @@ export default function BadgesPage() {
   const [newBadgeForm, setNewBadgeForm] = useState({
     name: '',
     rarity: 'common' as 'common' | 'rare' | 'epic' | 'legendary',
+    isGachaPrize: true,
     isPublic: true,
     allowedUserIds: [] as string[]
   })
@@ -112,6 +115,7 @@ export default function BadgesPage() {
     setEditForm({
       name: badge.name,
       rarity: badge.rarity || 'common',
+      isGachaPrize: badge.isGachaPrize ?? true,
       isPublic: badge.isPublic,
       allowedUserIds: badge.allowedUserIds
     })
@@ -122,6 +126,7 @@ export default function BadgesPage() {
     setEditForm({
       name: '',
       rarity: 'common',
+      isGachaPrize: true,
       isPublic: true,
       allowedUserIds: []
     })
@@ -137,6 +142,7 @@ export default function BadgesPage() {
         body: JSON.stringify({
           name: editForm.name,
           rarity: editForm.rarity,
+          isGachaPrize: editForm.isGachaPrize,
           isPublic: editForm.isPublic,
           allowedUserIds: editForm.allowedUserIds
         })
@@ -179,24 +185,34 @@ export default function BadgesPage() {
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('handleImageUpload called')
     const file = e.target.files?.[0]
-    if (!file) return
+    console.log('Selected file:', file)
+    if (!file) {
+      console.log('No file selected')
+      return
+    }
 
     setUploading(true)
     const formData = new FormData()
     formData.append('file', file)
 
     try {
+      console.log('Uploading to /api/upload...')
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       })
 
+      console.log('Response status:', response.status)
+
       if (response.ok) {
         const { url } = await response.json()
+        console.log('Uploaded URL:', url)
         setUploadedImageUrl(url)
       } else {
         const error = await response.json()
+        console.error('Upload error response:', error)
         alert(error.error || '画像のアップロードに失敗しました')
       }
     } catch (error) {
@@ -225,6 +241,7 @@ export default function BadgesPage() {
           name: newBadgeForm.name,
           icon: uploadedImageUrl,
           rarity: newBadgeForm.rarity,
+          isGachaPrize: newBadgeForm.isGachaPrize,
           isPublic: newBadgeForm.isPublic,
           allowedUserIds: newBadgeForm.allowedUserIds
         })
@@ -257,6 +274,7 @@ export default function BadgesPage() {
     setNewBadgeForm({
       name: '',
       rarity: 'common',
+      isGachaPrize: true,
       isPublic: true,
       allowedUserIds: []
     })
@@ -349,6 +367,15 @@ export default function BadgesPage() {
                   <span className={`px-2 py-1 rounded ${getRarityOption(badge.rarity).color}`}>
                     {getRarityOption(badge.rarity).label}
                   </span>
+                  {badge.isGachaPrize ? (
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      ガチャ出現
+                    </span>
+                  ) : (
+                    <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                      ガチャ対象外
+                    </span>
+                  )}
                   {badge.isPublic ? (
                     <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
                       公開
@@ -420,6 +447,22 @@ export default function BadgesPage() {
                         </label>
                       ))}
                     </div>
+                  </div>
+
+                  {/* ガチャ出現設定 */}
+                  <div>
+                    <label className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                      <input
+                        type="checkbox"
+                        checked={editForm.isGachaPrize}
+                        onChange={() => setEditForm({ ...editForm, isGachaPrize: !editForm.isGachaPrize })}
+                        className="w-5 h-5 rounded"
+                      />
+                      <div>
+                        <div className="font-medium text-gray-900">ガチャで出現する</div>
+                        <div className="text-xs text-gray-600">チェックを外すとガチャの抽選対象外になります</div>
+                      </div>
+                    </label>
                   </div>
 
                   {/* 公開設定 */}
@@ -609,6 +652,22 @@ export default function BadgesPage() {
                         </label>
                       ))}
                     </div>
+                  </div>
+
+                  {/* ガチャ出現設定 */}
+                  <div>
+                    <label className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                      <input
+                        type="checkbox"
+                        checked={newBadgeForm.isGachaPrize}
+                        onChange={() => setNewBadgeForm({ ...newBadgeForm, isGachaPrize: !newBadgeForm.isGachaPrize })}
+                        className="w-5 h-5 rounded"
+                      />
+                      <div>
+                        <div className="font-medium text-gray-900">ガチャで出現する</div>
+                        <div className="text-xs text-gray-600">チェックを外すとガチャの抽選対象外になります</div>
+                      </div>
+                    </label>
                   </div>
 
                   {/* 公開設定 */}
