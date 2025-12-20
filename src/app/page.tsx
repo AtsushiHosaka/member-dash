@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Pencil, Check, X, History, ChevronDown, ChevronUp } from 'lucide-react'
+import Image from 'next/image'
 import Timer from '@/components/Timer'
 import SessionModal from '@/components/SessionModal'
 import StartSessionModal from '@/components/StartSessionModal'
@@ -29,6 +30,16 @@ export default function Dashboard() {
   const [rankingLoading, setRankingLoading] = useState(true)
   const [goal, setGoal] = useState('')
   const [userRole, setUserRole] = useState<string>('')
+
+  // 初期ローディング状態の管理
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [loadingStates, setLoadingStates] = useState({
+    session: true,
+    ranking: true,
+    activeMembers: true,
+    userTickets: true,
+    mentorMembers: true
+  })
   const [isEditingGoal, setIsEditingGoal] = useState(false)
   const [editedGoal, setEditedGoal] = useState('')
   const [showHistory, setShowHistory] = useState(false)
@@ -38,6 +49,22 @@ export default function Dashboard() {
   const [isSubmittingSeasonGoal, setIsSubmittingSeasonGoal] = useState(false)
   const [showChristmasBonus, setShowChristmasBonus] = useState(false)
   const [christmasBonusChecked, setChristmasBonusChecked] = useState(false)
+
+  // 全てのローディングが完了したかチェック
+  useEffect(() => {
+    const role = (session?.user as any)?.role || ''
+    const isMentorOrAdmin = role === 'mentor' || role === 'admin'
+
+    // メンター/管理者でない場合はmentorMembersのロードは不要
+    const requiredLoads = isMentorOrAdmin
+      ? Object.values(loadingStates)
+      : [loadingStates.session, loadingStates.ranking, loadingStates.activeMembers, loadingStates.userTickets]
+
+    const allLoaded = requiredLoads.every(state => !state)
+    if (allLoaded && status === 'authenticated') {
+      setInitialLoading(false)
+    }
+  }, [loadingStates, status, session])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -58,13 +85,16 @@ export default function Dashboard() {
       const role = (session?.user as any)?.role || ''
       setUserRole(role)
       fetchActiveSession()
-      fetchRanking()
+      fetchRanking(null, true) // 初期ロード
       fetchActiveMembers()
       fetchUserTickets()
 
       // メンターまたは管理者の場合、担当メンバーを取得
       if (role === 'mentor' || role === 'admin') {
         fetchMentorMembers()
+      } else {
+        // メンター/管理者でない場合はmentorMembersのロードをスキップ
+        setLoadingStates(prev => ({ ...prev, mentorMembers: false }))
       }
 
       // クリスマスログインボーナスをチェック
@@ -101,10 +131,12 @@ export default function Dashboard() {
       setActiveSession(data.session)
     } catch (error) {
       console.error('Failed to fetch active session:', error)
+    } finally {
+      setLoadingStates(prev => ({ ...prev, session: false }))
     }
   }
 
-  const fetchRanking = async (schoolId?: string | null) => {
+  const fetchRanking = async (schoolId?: string | null, isInitial = false) => {
     setRankingLoading(true)
     try {
       const url = schoolId
@@ -121,6 +153,9 @@ export default function Dashboard() {
       console.error('Failed to fetch ranking:', error)
     } finally {
       setRankingLoading(false)
+      if (isInitial) {
+        setLoadingStates(prev => ({ ...prev, ranking: false }))
+      }
     }
   }
 
@@ -139,6 +174,8 @@ export default function Dashboard() {
       setActiveMembers(data)
     } catch (error) {
       console.error('Failed to fetch active members:', error)
+    } finally {
+      setLoadingStates(prev => ({ ...prev, activeMembers: false }))
     }
   }
 
@@ -167,6 +204,8 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Failed to fetch user tickets:', error)
       router.push('/login')
+    } finally {
+      setLoadingStates(prev => ({ ...prev, userTickets: false }))
     }
   }
 
@@ -183,6 +222,8 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Failed to fetch mentor members:', error)
+    } finally {
+      setLoadingStates(prev => ({ ...prev, mentorMembers: false }))
     }
   }
 
@@ -389,10 +430,35 @@ export default function Dashboard() {
     }
   }
 
-  if (status === 'loading') {
+  if (status === 'loading' || (status === 'authenticated' && initialLoading)) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">読み込み中...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          {/* ローディングアニメーション */}
+          <div className="relative w-20 h-20 mx-auto mb-6">
+            {/* 外側のリング */}
+            <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+            {/* アニメーションするリング */}
+            <div className="absolute inset-0 border-4 border-transparent border-t-green-500 rounded-full animate-spin"></div>
+            {/* 中央のドット */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+          {/* テキスト */}
+          <div className="text-lg font-medium text-gray-700 mb-2">
+            Loading...
+          </div>
+          <div className="text-sm text-gray-500">
+            データを読み込んでいます
+          </div>
+          {/* プログレスドット */}
+          <div className="flex justify-center gap-1 mt-4">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          </div>
+        </div>
       </div>
     )
   }
