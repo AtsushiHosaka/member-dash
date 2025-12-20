@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Snowfall from '@/components/Snowfall'
 
 interface School {
   id: string
@@ -140,20 +141,21 @@ export default function SchoolsAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen bg-christmas-red-bg py-8 relative overflow-hidden">
+      <Snowfall isAccumulating={false} />
+      <div className="max-w-4xl mx-auto px-4 relative z-10">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">スクール管理</h1>
+          <h1 className="text-3xl font-bold text-white">スクール管理</h1>
           <button
             onClick={() => router.push('/')}
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
+            className="px-4 py-2 text-sm text-white/80 hover:text-white"
           >
             ← ダッシュボードに戻る
           </button>
         </div>
 
         {/* 新規作成フォーム */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4">新しいスクールを追加</h2>
           <form onSubmit={handleCreate} className="flex gap-3">
             <input
@@ -167,7 +169,7 @@ export default function SchoolsAdminPage() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
+              className="px-6 py-2 bg-christmas-red text-white rounded-lg hover:bg-christmas-red-dark disabled:bg-gray-400 transition"
             >
               追加
             </button>
@@ -175,7 +177,7 @@ export default function SchoolsAdminPage() {
         </div>
 
         {/* スクール一覧 */}
-        <div className="bg-white rounded-lg shadow">
+        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold">スクール一覧</h2>
           </div>
@@ -223,7 +225,7 @@ export default function SchoolsAdminPage() {
                         <button
                           onClick={() => startEdit(school)}
                           disabled={loading}
-                          className="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded disabled:text-gray-400"
+                          className="px-4 py-2 text-sm text-christmas-red hover:bg-red-50 rounded disabled:bg-gray-400"
                         >
                           編集
                         </button>

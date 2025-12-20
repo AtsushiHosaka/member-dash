@@ -41,7 +41,7 @@ export default function MentorMembers({ members }: MentorMembersProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8">
+    <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6 mb-8">
       <h2 className="text-xl font-bold text-gray-900 mb-4">担当メンバー一覧</h2>
 
       <div className="space-y-3">
@@ -91,7 +91,7 @@ export default function MentorMembers({ members }: MentorMembersProps) {
               {/* 今週の開発時間 */}
               <div className="text-right flex-shrink-0">
                 <div className="text-sm text-gray-500">今週</div>
-                <div className="text-lg font-bold text-blue-600">
+                <div className="text-lg font-bold text-christmas-red">
                   {formatDuration(member.weeklyDuration)}
                 </div>
               </div>

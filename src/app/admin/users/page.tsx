@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useToast } from '@/hooks/use-toast'
 import BulkImportModal from '@/components/BulkImportModal'
+import Snowfall from '@/components/Snowfall'
 
 interface School {
   id: string
@@ -192,24 +193,25 @@ export default function UsersAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="min-h-screen bg-christmas-red-bg py-8 relative overflow-hidden">
+      <Snowfall isAccumulating={false} />
+      <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">ユーザー管理</h1>
+          <h1 className="text-3xl font-bold text-white">ユーザー管理</h1>
           <button
             onClick={() => router.push('/')}
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
+            className="px-4 py-2 text-sm text-white hover:text-white/80"
           >
             ← ダッシュボードに戻る
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow">
+        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-lg font-semibold">全ユーザー一覧</h2>
             <button
               onClick={() => setIsBulkImportOpen(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+              className="px-4 py-2 bg-christmas-red text-white rounded-lg hover:bg-christmas-red-dark transition text-sm font-medium"
             >
               + 一括追加
             </button>

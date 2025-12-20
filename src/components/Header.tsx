@@ -55,7 +55,7 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
   }
 
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+    <header className="bg-christmas-red shadow-lg border-b border-christmas-red-dark sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center gap-3">
@@ -70,7 +70,7 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
               height={32}
               className="w-8 h-8 object-contain"
             />
-            <span className="text-2xl font-bold text-gray-800">Hash</span>
+            <span className="text-2xl font-bold text-white">Hash</span>
           </button>
         </div>
 
@@ -78,7 +78,7 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
         <div className="flex items-center gap-3">
           <button
             onClick={handleUserNameClick}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:bg-christmas-red-dark rounded-lg transition"
           >
             <UserCircle className="w-4 h-4" />
             {userName}
@@ -86,25 +86,25 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
 
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="sm" className="p-2">
+              <Button variant="ghost" size="sm" className="p-2 text-white hover:bg-christmas-red-dark hover:text-white">
                 {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] sm:w-[350px]">
+            <SheetContent side="right" className="w-[280px] sm:w-[350px] bg-christmas-red border-christmas-red-dark">
               <SheetHeader>
-                <SheetTitle className="text-left">メニュー</SheetTitle>
+                <SheetTitle className="text-left text-white">メニュー</SheetTitle>
               </SheetHeader>
               <div className="mt-6 space-y-1">
                 {/* User Info - clickable */}
                 <button
                   onClick={handleUserNameClick}
-                  className="w-full px-3 py-4 bg-gray-50 rounded-lg mb-4 hover:bg-gray-100 transition text-left"
+                  className="w-full px-3 py-4 bg-white/10 rounded-lg mb-4 hover:bg-white/20 transition text-left"
                 >
-                  <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                  <div className="flex items-center gap-2 text-sm text-white/80 mb-1">
                     <UserCircle className="w-4 h-4" />
                     ログイン中
                   </div>
-                  <div className="font-semibold text-gray-800">{userName}</div>
+                  <div className="font-semibold text-white">{userName}</div>
                 </button>
 
                 {/* Menu Items */}
@@ -112,7 +112,7 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
                   <button
                     key={item.path}
                     onClick={() => handleNavigation(item.path)}
-                    className="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                    className="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-white hover:bg-white/10 rounded-lg transition"
                   >
                     <item.icon className="w-5 h-5" />
                     {item.label}
@@ -120,13 +120,13 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
                 ))}
 
                 {/* Divider */}
-                <div className="border-t border-gray-200 my-3"></div>
+                <div className="border-t border-white/20 my-3"></div>
 
                 {/* 命名投票設定（管理者・メンターのみ） */}
                 {/* {(isAdmin || isMentor) && (
                   <button
                     onClick={() => handleNavigation('/naming-poll-settings')}
-                    className="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                    className="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-white hover:bg-white/10 rounded-lg transition"
                   >
                     <Vote className="w-5 h-5" />
                     命名投票設定
@@ -139,7 +139,7 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={closeMenu}
-                  className="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                  className="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-white hover:bg-white/10 rounded-lg transition"
                 >
                   <MessageCircle className="w-5 h-5" />
                   お問い合わせ

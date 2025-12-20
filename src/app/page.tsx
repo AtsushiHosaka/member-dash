@@ -13,6 +13,7 @@ import Ranking from '@/components/Ranking'
 import ActiveMembers from '@/components/ActiveMembers'
 import MentorMembers from '@/components/MentorMembers'
 import ChristmasLoginBonusModal from '@/components/ChristmasLoginBonusModal'
+import Snowfall from '@/components/Snowfall'
 // import NamingPoll from '@/components/NamingPoll'
 
 export default function Dashboard() {
@@ -148,9 +149,16 @@ export default function Dashboard() {
         return
       }
       const data = await response.json()
-      setRanking(data)
+      // APIがエラーを返した場合や配列でない場合は空配列をセット
+      if (Array.isArray(data)) {
+        setRanking(data)
+      } else {
+        console.error('Ranking API returned non-array:', data)
+        setRanking([])
+      }
     } catch (error) {
       console.error('Failed to fetch ranking:', error)
+      setRanking([])
     } finally {
       setRankingLoading(false)
       if (isInitial) {
@@ -432,31 +440,32 @@ export default function Dashboard() {
 
   if (status === 'loading' || (status === 'authenticated' && initialLoading)) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-christmas-red-bg flex items-center justify-center relative overflow-hidden">
+        <Snowfall isAccumulating={false} />
+        <div className="text-center relative z-10">
           {/* ローディングアニメーション */}
           <div className="relative w-20 h-20 mx-auto mb-6">
             {/* 外側のリング */}
-            <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-white/30 rounded-full"></div>
             {/* アニメーションするリング */}
-            <div className="absolute inset-0 border-4 border-transparent border-t-green-500 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-4 border-transparent border-t-white rounded-full animate-spin"></div>
             {/* 中央のドット */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
             </div>
           </div>
           {/* テキスト */}
-          <div className="text-lg font-medium text-gray-700 mb-2">
+          <div className="text-lg font-medium text-white mb-2">
             Loading...
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-white/70">
             データを読み込んでいます
           </div>
           {/* プログレスドット */}
           <div className="flex justify-center gap-1 mt-4">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
           </div>
         </div>
       </div>
@@ -476,11 +485,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="max-w-6xl mx-auto px-4 py-6 md:py-8">
+    <div className="min-h-screen bg-christmas-red-bg relative overflow-hidden">
+      <Snowfall isAccumulating={!!activeSession} />
+      <main className="max-w-6xl mx-auto px-4 py-6 md:py-8 relative z-10">
         <ActiveMembers members={activeMembers} />
 
-        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-10 mb-8">
+        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6 md:p-10 mb-8">
           <div className="text-center mb-10">
             <div className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
               {formatCurrentTime(currentTime)}
@@ -501,10 +511,10 @@ export default function Dashboard() {
 
               {/* 目標の表示と編集 */}
               <div className="mt-6 max-w-2xl mx-auto">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
-                      <div className="text-sm font-medium text-green-800 mb-2">
+                      <div className="text-sm font-medium text-christmas-red mb-2">
                         今日の目標
                       </div>
                       {isEditingGoal ? (
@@ -512,14 +522,14 @@ export default function Dashboard() {
                           <textarea
                             value={editedGoal}
                             onChange={(e) => setEditedGoal(e.target.value)}
-                            className="w-full px-3 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                            className="w-full px-3 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-christmas-red resize-none"
                             rows={3}
                             placeholder="目標を入力してください"
                           />
                           <div className="flex gap-2">
                             <button
                               onClick={handleSaveGoal}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
+                              className="flex items-center gap-1 px-3 py-1.5 bg-christmas-red text-white text-sm rounded-lg hover:bg-christmas-red-dark transition"
                             >
                               <Check className="w-4 h-4" />
                               保存
@@ -534,7 +544,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                       ) : (
-                        <p className="text-green-900 whitespace-pre-wrap">
+                        <p className="text-christmas-red-darker whitespace-pre-wrap">
                           {activeSession.goal}
                         </p>
                       )}
@@ -542,10 +552,10 @@ export default function Dashboard() {
                     {!isEditingGoal && (
                       <button
                         onClick={handleEditGoal}
-                        className="p-2 hover:bg-green-100 rounded-lg transition flex-shrink-0"
+                        className="p-2 hover:bg-red-100 rounded-lg transition flex-shrink-0"
                         title="目標を編集"
                       >
-                        <Pencil className="w-4 h-4 text-green-700" />
+                        <Pencil className="w-4 h-4 text-christmas-red" />
                       </button>
                     )}
                   </div>
@@ -642,7 +652,7 @@ export default function Dashboard() {
                   <button
                     onClick={handleSubmitSeasonGoal}
                     disabled={isSubmittingSeasonGoal || !seasonGoalInput.trim()}
-                    className="w-full px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
+                    className="w-full px-4 py-2 bg-christmas-red text-white font-medium rounded-lg hover:bg-christmas-red-dark disabled:bg-gray-400 transition"
                   >
                     {isSubmittingSeasonGoal ? '設定中...' : '目標を設定'}
                   </button>
@@ -656,7 +666,7 @@ export default function Dashboard() {
               <motion.button
                 onClick={handleStartSession}
                 disabled={loading}
-                className="group relative px-10 py-5 bg-gradient-to-r from-green-600 to-green-500 text-white text-xl font-bold rounded-xl hover:from-green-700 hover:to-green-600 disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl"
+                className="group relative px-10 py-5 bg-gradient-to-r from-christmas-red to-christmas-red-light text-white text-xl font-bold rounded-xl hover:from-christmas-red-dark hover:to-christmas-red disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -673,7 +683,7 @@ export default function Dashboard() {
               <motion.button
                 onClick={handleEndSession}
                 disabled={loading}
-                className="group relative px-10 py-5 bg-gradient-to-r from-red-600 to-red-500 text-white text-xl font-bold rounded-xl hover:from-red-700 hover:to-red-600 disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl"
+                className="group relative px-10 py-5 bg-gradient-to-r from-christmas-red-darker to-christmas-red-dark text-white text-xl font-bold rounded-xl hover:from-christmas-red-bg hover:to-christmas-red-darker disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}

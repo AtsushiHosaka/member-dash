@@ -12,6 +12,7 @@ import SessionHistoryModal from '@/components/SessionHistoryModal'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import Avatar from '@/components/Avatar'
 import Image from 'next/image'
+import Snowfall from '@/components/Snowfall'
 
 // デフォルトの絵文字アイコン一覧
 const DEFAULT_EMOJI_ICONS = [
@@ -451,16 +452,18 @@ export default function UserDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">読み込み中...</div>
+      <div className="min-h-screen flex items-center justify-center bg-christmas-red-bg relative overflow-hidden">
+        <Snowfall isAccumulating={false} />
+        <div className="text-xl text-white relative z-10">読み込み中...</div>
       </div>
     )
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">ユーザーが見つかりません</div>
+      <div className="min-h-screen flex items-center justify-center bg-christmas-red-bg relative overflow-hidden">
+        <Snowfall isAccumulating={false} />
+        <div className="text-xl text-white relative z-10">ユーザーが見つかりません</div>
       </div>
     )
   }
@@ -486,17 +489,18 @@ export default function UserDetailPage() {
   const displaySeasonGoal = isSeasonGoalValid ? user.seasonGoal : null
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen bg-christmas-red-bg py-8 relative overflow-hidden">
+      <Snowfall isAccumulating={false} />
+      <div className="max-w-4xl mx-auto px-4 relative z-10">
         <button
           onClick={() => router.back()}
-          className="mb-6 text-blue-600 hover:text-blue-800"
+          className="mb-6 text-white hover:text-white/80"
         >
           ← 戻る
         </button>
 
         {/* ユーザー情報 */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center gap-6">
             <div className="flex flex-col items-center gap-2">
               <Avatar
@@ -603,7 +607,7 @@ export default function UserDetailPage() {
 
         {/* 今期の目標 */}
         {(displaySeasonGoal || (session?.user as any)?.id === userId) && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md p-6 mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">今期の目標（2026/3/31まで）</h3>
 
             {displaySeasonGoal && !isEditingSeasonGoal ? (
@@ -668,13 +672,13 @@ export default function UserDetailPage() {
         )}
 
         {/* 開発履歴 */}
-        <div className="bg-white rounded-lg shadow-md">
+        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md">
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-xl font-bold">開発履歴</h2>
             {canAddManualSession() && (
               <button
                 onClick={() => setIsManualModalOpen(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                className="px-4 py-2 bg-christmas-red text-white rounded-lg hover:bg-christmas-red-dark transition text-sm font-medium"
               >
                 + 開発記録を追加
               </button>

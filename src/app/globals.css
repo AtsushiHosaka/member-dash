@@ -3,18 +3,38 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #7F1D1D;
   --foreground: #171717;
+  --christmas-red: #B91C1C;
+  --christmas-red-light: #DC2626;
+  --christmas-red-dark: #991B1B;
+  --christmas-red-darker: #7F1D1D;
+  --christmas-red-bg: #7F1D1D;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background: var(--christmas-red-bg);
   font-family: Arial, Helvetica, sans-serif;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* Christmas theme button styles */
+@layer components {
+  .btn-christmas {
+    @apply bg-christmas-red hover:bg-christmas-red-dark text-white font-medium transition-colors;
+  }
+
+  .btn-christmas-light {
+    @apply bg-christmas-red-light hover:bg-christmas-red text-white font-medium transition-colors;
+  }
+
+  .card-christmas {
+    @apply bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20;
   }
 }

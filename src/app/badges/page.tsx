@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Edit2, X, Plus, Upload, Trash2 } from 'lucide-react'
 import Image from 'next/image'
+import Snowfall from '@/components/Snowfall'
 
 interface Badge {
   id: string
@@ -311,27 +312,29 @@ export default function BadgesPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">読み込み中...</div>
+      <div className="min-h-screen flex items-center justify-center bg-christmas-red-bg relative overflow-hidden">
+        <Snowfall isAccumulating={false} />
+        <div className="text-xl text-white relative z-10">読み込み中...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="max-w-6xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-christmas-red-bg relative overflow-hidden">
+      <Snowfall isAccumulating={false} />
+      <main className="max-w-6xl mx-auto px-4 py-8 relative z-10">
         <div className="mb-8 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">バッジ一覧</h1>
+          <h1 className="text-3xl font-bold text-white">バッジ一覧</h1>
           <button
             onClick={openAddModal}
-            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+            className="flex items-center gap-2 bg-christmas-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-christmas-red-dark transition"
           >
             <Plus className="w-5 h-5" />
             新しいバッジを追加
           </button>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm border border-white/20 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             登録済みバッジ ({badges.length}個)
           </h2>
@@ -530,7 +533,7 @@ export default function BadgesPage() {
                   <div className="flex gap-3 pt-4">
                     <button
                       onClick={handleUpdateBadge}
-                      className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                      className="flex-1 bg-christmas-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-christmas-red-dark transition"
                     >
                       保存
                     </button>
@@ -736,7 +739,7 @@ export default function BadgesPage() {
                     <button
                       onClick={handleCreateBadge}
                       disabled={!newBadgeForm.name.trim() || !uploadedImageUrl}
-                      className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                      className="flex-1 bg-christmas-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-christmas-red-dark disabled:bg-gray-400 disabled:cursor-not-allowed transition"
                     >
                       作成
                     </button>

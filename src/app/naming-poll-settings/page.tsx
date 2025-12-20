@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2 } from 'lucide-react'
+import Snowfall from '@/components/Snowfall'
 
 interface PollOption {
   id: string
@@ -201,8 +202,9 @@ export default function NamingPollSettingsPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">読み込み中...</div>
+      <div className="min-h-screen flex items-center justify-center bg-christmas-red-bg relative overflow-hidden">
+        <Snowfall isAccumulating={false} />
+        <div className="text-xl text-white relative z-10">読み込み中...</div>
       </div>
     )
   }
@@ -215,14 +217,15 @@ export default function NamingPollSettingsPage() {
   const totalVotes = sortedOptions.reduce((sum, option) => sum + option._count.votes, 0)
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-christmas-red-bg relative overflow-hidden">
+      <Snowfall isAccumulating={false} />
+      <main className="max-w-4xl mx-auto px-4 py-8 relative z-10">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">命名投票設定</h1>
+          <h1 className="text-3xl font-bold text-white">命名投票設定</h1>
         </div>
 
         {/* 投票の表示/非表示 */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">投票の表示設定</h2>
           <label className={`flex items-center gap-3 ${toggling ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
             <input
@@ -244,7 +247,7 @@ export default function NamingPollSettingsPage() {
         </div>
 
         {/* 選択肢の追加 */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">選択肢を追加</h2>
           <div className="flex gap-3">
             <input
@@ -253,12 +256,12 @@ export default function NamingPollSettingsPage() {
               onChange={(e) => setNewOptionText(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addOption()}
               placeholder="選択肢のテキストを入力"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-christmas-red focus:border-transparent"
             />
             <button
               onClick={addOption}
               disabled={addingOption}
-              className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+              className="flex items-center gap-2 px-6 py-2 bg-christmas-red text-white rounded-lg font-semibold hover:bg-christmas-red-dark disabled:bg-gray-400 disabled:cursor-not-allowed transition"
             >
               <Plus className="w-5 h-5" />
               {addingOption ? '追加中...' : '追加'}
@@ -267,7 +270,7 @@ export default function NamingPollSettingsPage() {
         </div>
 
         {/* 投票ランキング */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             投票結果ランキング（全{totalVotes}票）
           </h2>
@@ -290,7 +293,7 @@ export default function NamingPollSettingsPage() {
                     <div className="flex items-center gap-2">
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
                         <div
-                          className="bg-blue-600 h-2 rounded-full transition-all"
+                          className="bg-christmas-red h-2 rounded-full transition-all"
                           style={{
                             width: totalVotes > 0 ? `${(option._count.votes / totalVotes) * 100}%` : '0%'
                           }}

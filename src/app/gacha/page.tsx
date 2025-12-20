@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Snowfall from '@/components/Snowfall'
 
 interface Badge {
   id: string
@@ -134,8 +135,9 @@ export default function GachaPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">読み込み中...</div>
+      <div className="min-h-screen flex items-center justify-center bg-christmas-red-bg relative overflow-hidden">
+        <Snowfall isAccumulating={false} />
+        <div className="text-xl text-white relative z-10">読み込み中...</div>
       </div>
     )
   }
@@ -145,21 +147,22 @@ export default function GachaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen bg-christmas-red-bg relative overflow-hidden">
+      <Snowfall isAccumulating={false} />
+      <header className="bg-christmas-red shadow-lg border-b border-christmas-red-dark relative z-10">
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold">ガチャ</h1>
+          <h1 className="text-xl font-bold text-white">ガチャ</h1>
           <button
             onClick={() => router.push('/')}
-            className="text-sm text-blue-600 hover:text-blue-800"
+            className="text-sm text-white hover:text-white/80"
           >
             ホームに戻る
           </button>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-md p-8 mb-8">
+      <main className="max-w-4xl mx-auto px-4 py-8 relative z-10">
+        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md p-8 mb-8">
           {/* ガチャ画像 */}
           <div className="flex justify-center mb-6">
             <div className={`transition-transform duration-300 ${isAnimating ? 'animate-shake' : ''}`}>
@@ -194,7 +197,7 @@ export default function GachaPage() {
             <button
               onClick={handleDrawGacha}
               disabled={loading || tickets < 1}
-              className="px-12 py-6 bg-blue-600 text-white text-2xl font-bold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition shadow-lg"
+              className="px-12 py-6 bg-christmas-red text-white text-2xl font-bold rounded-lg hover:bg-christmas-red-dark disabled:bg-gray-400 transition shadow-lg"
             >
               {loading ? 'ガチャ中...' : 'ガチャを引く'}
             </button>
@@ -202,7 +205,7 @@ export default function GachaPage() {
         </div>
 
         {isAnimating && (
-          <div className="bg-white rounded-lg shadow-md p-8 mb-8">
+          <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md p-8 mb-8">
             <div className="text-center">
               <div className="text-6xl animate-bounce mb-4">✨</div>
               <div className="text-xl text-gray-600">抽選中...</div>
@@ -211,7 +214,7 @@ export default function GachaPage() {
         )}
 
         {!isAnimating && result && (
-          <div className="bg-white rounded-lg shadow-md p-8 mb-8 animate-fade-in">
+          <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md p-8 mb-8 animate-fade-in">
             <div className="text-center">
               <div className="mb-4">
                 {result.icon.startsWith('/') || result.icon.startsWith('http') ? (
@@ -236,7 +239,7 @@ export default function GachaPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow-md p-8">
+        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md p-8">
           <h2 className="text-xl font-bold text-gray-800 mb-4">レアリティ</h2>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
