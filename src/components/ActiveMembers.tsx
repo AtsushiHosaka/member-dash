@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import Avatar from './Avatar'
+import { useTheme } from '@/contexts/ThemeContext'
 
 interface ActiveMember {
   id: string
@@ -18,6 +19,7 @@ interface ActiveMembersProps {
 
 export default function ActiveMembers({ members }: ActiveMembersProps) {
   const router = useRouter()
+  const { isNewYear } = useTheme()
   const formatStartTime = (startTime: string) => {
     const date = new Date(startTime)
     const hours = String(date.getHours()).padStart(2, '0')
@@ -35,8 +37,10 @@ export default function ActiveMembers({ members }: ActiveMembersProps) {
   }
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md p-6 mb-6">
-      <h3 className="text-sm font-semibold text-gray-700 mb-4">開発中</h3>
+    <div className={`rounded-lg shadow-md p-6 mb-6 ${
+      isNewYear ? 'bg-white border-2 border-red-100' : 'bg-white/95 backdrop-blur-sm'
+    }`}>
+      <h3 className="text-sm font-semibold text-gray-700 mb-4">{isNewYear ? '🔥 開発中' : '開発中'}</h3>
       <div className="overflow-x-auto -mx-2 px-2">
         <div className="flex gap-6 py-2" style={{ minWidth: 'min-content' }}>
           {members.map((member) => (

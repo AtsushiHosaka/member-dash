@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import Snowfall from '@/components/Snowfall'
+import ThemeDecorations from '@/components/ThemeDecorations'
 
 interface Badge {
   id: string
@@ -135,9 +135,9 @@ export default function GachaPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-christmas-red-bg relative overflow-hidden">
-        <Snowfall isAccumulating={false} />
-        <div className="text-xl text-white relative z-10">読み込み中...</div>
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-white">
+        <ThemeDecorations isAccumulating={false} />
+        <div className="text-xl relative z-10 text-gray-800">読み込み中...</div>
       </div>
     )
   }
@@ -147,11 +147,11 @@ export default function GachaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-christmas-red-bg relative overflow-hidden">
-      <Snowfall isAccumulating={false} />
-      <header className="bg-christmas-red shadow-lg border-b border-christmas-red-dark relative z-10">
+    <div className="min-h-screen relative overflow-hidden bg-white">
+      <ThemeDecorations isAccumulating={false} />
+      <header className="shadow-lg border-b relative z-10 bg-red-600 border-red-700">
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-white">ガチャ</h1>
+          <h1 className="text-xl font-bold text-white">🎍 ガチャ</h1>
           <button
             onClick={() => router.push('/')}
             className="text-sm text-white hover:text-white/80"
@@ -162,7 +162,7 @@ export default function GachaPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8 relative z-10">
-        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md p-8 mb-8">
+        <div className="rounded-lg shadow-md p-8 mb-8 bg-white border-2 border-red-100">
           {/* ガチャ画像 */}
           <div className="flex justify-center mb-6">
             <div className={`transition-transform duration-300 ${isAnimating ? 'animate-shake' : ''}`}>
@@ -197,7 +197,7 @@ export default function GachaPage() {
             <button
               onClick={handleDrawGacha}
               disabled={loading || tickets < 1}
-              className="px-12 py-6 bg-christmas-red text-white text-2xl font-bold rounded-lg hover:bg-christmas-red-dark disabled:bg-gray-400 transition shadow-lg"
+              className="px-12 py-6 text-white text-2xl font-bold rounded-lg disabled:bg-gray-400 transition shadow-lg bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600"
             >
               {loading ? 'ガチャ中...' : 'ガチャを引く'}
             </button>
@@ -205,16 +205,16 @@ export default function GachaPage() {
         </div>
 
         {isAnimating && (
-          <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md p-8 mb-8">
+          <div className="rounded-lg shadow-md p-8 mb-8 bg-white border-2 border-red-100">
             <div className="text-center">
-              <div className="text-6xl animate-bounce mb-4">✨</div>
+              <div className="text-6xl animate-bounce mb-4">🎍</div>
               <div className="text-xl text-gray-600">抽選中...</div>
             </div>
           </div>
         )}
 
         {!isAnimating && result && (
-          <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md p-8 mb-8 animate-fade-in">
+          <div className="rounded-lg shadow-md p-8 mb-8 animate-fade-in bg-white border-2 border-red-100">
             <div className="text-center">
               <div className="mb-4">
                 {result.icon.startsWith('/') || result.icon.startsWith('http') ? (
@@ -239,7 +239,7 @@ export default function GachaPage() {
           </div>
         )}
 
-        <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md p-8">
+        <div className="rounded-lg shadow-md p-8 bg-white border-2 border-red-100">
           <h2 className="text-xl font-bold text-gray-800 mb-4">レアリティ</h2>
           <div className="space-y-3">
             <div className="flex justify-between items-center">

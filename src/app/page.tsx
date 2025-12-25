@@ -12,8 +12,8 @@ import StartSessionModal from '@/components/StartSessionModal'
 import Ranking from '@/components/Ranking'
 import ActiveMembers from '@/components/ActiveMembers'
 import MentorMembers from '@/components/MentorMembers'
-import ChristmasLoginBonusModal from '@/components/ChristmasLoginBonusModal'
-import Snowfall from '@/components/Snowfall'
+import NewYearLoginBonusModal from '@/components/NewYearLoginBonusModal'
+import ThemeDecorations from '@/components/ThemeDecorations'
 // import NamingPoll from '@/components/NamingPoll'
 
 export default function Dashboard() {
@@ -48,8 +48,8 @@ export default function Dashboard() {
   const [seasonGoal, setSeasonGoal] = useState<string | null>(null)
   const [seasonGoalInput, setSeasonGoalInput] = useState('')
   const [isSubmittingSeasonGoal, setIsSubmittingSeasonGoal] = useState(false)
-  const [showChristmasBonus, setShowChristmasBonus] = useState(false)
-  const [christmasBonusChecked, setChristmasBonusChecked] = useState(false)
+  const [showNewYearBonus, setShowNewYearBonus] = useState(false)
+  const [newYearBonusChecked, setNewYearBonusChecked] = useState(false)
 
   // 全てのローディングが完了したかチェック
   useEffect(() => {
@@ -98,14 +98,14 @@ export default function Dashboard() {
         setLoadingStates(prev => ({ ...prev, mentorMembers: false }))
       }
 
-      // クリスマスログインボーナスをチェック
-      checkChristmasBonus()
+      // 年末年始ログインボーナスをチェック
+      checkNewYearBonus()
     }
   }, [status, session])
 
-  const checkChristmasBonus = async () => {
-    if (christmasBonusChecked) return
-    setChristmasBonusChecked(true)
+  const checkNewYearBonus = async () => {
+    if (newYearBonusChecked) return
+    setNewYearBonusChecked(true)
 
     try {
       const response = await fetch('/api/christmas-bonus')
@@ -113,11 +113,11 @@ export default function Dashboard() {
         const data = await response.json()
         // イベント期間中で、まだ今日のボーナスを受け取っていない場合
         if (data.isEventPeriod && !data.alreadyClaimed) {
-          setShowChristmasBonus(true)
+          setShowNewYearBonus(true)
         }
       }
     } catch (error) {
-      console.error('Failed to check Christmas bonus:', error)
+      console.error('Failed to check New Year bonus:', error)
     }
   }
 
@@ -440,32 +440,32 @@ export default function Dashboard() {
 
   if (status === 'loading' || (status === 'authenticated' && initialLoading)) {
     return (
-      <div className="min-h-screen bg-christmas-red-bg flex items-center justify-center relative overflow-hidden">
-        <Snowfall isAccumulating={false} />
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-white">
+        <ThemeDecorations isAccumulating={false} />
         <div className="text-center relative z-10">
           {/* ローディングアニメーション */}
           <div className="relative w-20 h-20 mx-auto mb-6">
             {/* 外側のリング */}
-            <div className="absolute inset-0 border-4 border-white/30 rounded-full"></div>
+            <div className="absolute inset-0 border-4 rounded-full border-red-200"></div>
             {/* アニメーションするリング */}
-            <div className="absolute inset-0 border-4 border-transparent border-t-white rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-4 border-transparent rounded-full animate-spin border-t-red-600"></div>
             {/* 中央のドット */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+              <div className="w-3 h-3 rounded-full animate-pulse bg-red-600"></div>
             </div>
           </div>
           {/* テキスト */}
-          <div className="text-lg font-medium text-white mb-2">
+          <div className="text-lg font-medium mb-2 text-gray-800">
             Loading...
           </div>
-          <div className="text-sm text-white/70">
+          <div className="text-sm text-gray-500">
             データを読み込んでいます
           </div>
           {/* プログレスドット */}
           <div className="flex justify-center gap-1 mt-4">
-            <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            <div className="w-2 h-2 rounded-full animate-bounce bg-red-600" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 rounded-full animate-bounce bg-amber-500" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 rounded-full animate-bounce bg-red-600" style={{ animationDelay: '300ms' }}></div>
           </div>
         </div>
       </div>
@@ -485,8 +485,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-christmas-red-bg relative overflow-hidden">
-      <Snowfall isAccumulating={!!activeSession} />
+    <div className="min-h-screen relative overflow-hidden bg-white">
+      <ThemeDecorations isAccumulating={!!activeSession} />
       <main className="max-w-6xl mx-auto px-4 py-6 md:py-8 relative z-10">
         <ActiveMembers members={activeMembers} />
 
@@ -514,7 +514,7 @@ export default function Dashboard() {
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
-                      <div className="text-sm font-medium text-christmas-red mb-2">
+                      <div className="text-sm font-medium text-red-600 mb-2">
                         今日の目標
                       </div>
                       {isEditingGoal ? (
@@ -522,14 +522,14 @@ export default function Dashboard() {
                           <textarea
                             value={editedGoal}
                             onChange={(e) => setEditedGoal(e.target.value)}
-                            className="w-full px-3 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-christmas-red resize-none"
+                            className="w-full px-3 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 resize-none"
                             rows={3}
                             placeholder="目標を入力してください"
                           />
                           <div className="flex gap-2">
                             <button
                               onClick={handleSaveGoal}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-christmas-red text-white text-sm rounded-lg hover:bg-christmas-red-dark transition"
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition"
                             >
                               <Check className="w-4 h-4" />
                               保存
@@ -544,7 +544,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                       ) : (
-                        <p className="text-christmas-red-darker whitespace-pre-wrap">
+                        <p className="text-red-800 whitespace-pre-wrap">
                           {activeSession.goal}
                         </p>
                       )}
@@ -555,7 +555,7 @@ export default function Dashboard() {
                         className="p-2 hover:bg-red-100 rounded-lg transition flex-shrink-0"
                         title="目標を編集"
                       >
-                        <Pencil className="w-4 h-4 text-christmas-red" />
+                        <Pencil className="w-4 h-4 text-red-600" />
                       </button>
                     )}
                   </div>
@@ -652,7 +652,7 @@ export default function Dashboard() {
                   <button
                     onClick={handleSubmitSeasonGoal}
                     disabled={isSubmittingSeasonGoal || !seasonGoalInput.trim()}
-                    className="w-full px-4 py-2 bg-christmas-red text-white font-medium rounded-lg hover:bg-christmas-red-dark disabled:bg-gray-400 transition"
+                    className="w-full px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition"
                   >
                     {isSubmittingSeasonGoal ? '設定中...' : '目標を設定'}
                   </button>
@@ -666,7 +666,7 @@ export default function Dashboard() {
               <motion.button
                 onClick={handleStartSession}
                 disabled={loading}
-                className="group relative px-10 py-5 bg-gradient-to-r from-christmas-red to-christmas-red-light text-white text-xl font-bold rounded-xl hover:from-christmas-red-dark hover:to-christmas-red disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl"
+                className="group relative px-10 py-5 text-white text-xl font-bold rounded-xl disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -683,7 +683,7 @@ export default function Dashboard() {
               <motion.button
                 onClick={handleEndSession}
                 disabled={loading}
-                className="group relative px-10 py-5 bg-gradient-to-r from-christmas-red-darker to-christmas-red-dark text-white text-xl font-bold rounded-xl hover:from-christmas-red-bg hover:to-christmas-red-darker disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl"
+                className="group relative px-10 py-5 text-white text-xl font-bold rounded-xl disabled:from-gray-400 disabled:to-gray-400 shadow-lg hover:shadow-xl bg-gradient-to-r from-red-700 to-red-600 hover:from-red-800 hover:to-red-700"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -733,10 +733,10 @@ export default function Dashboard() {
         goal={activeSession?.goal}
       />
 
-      <ChristmasLoginBonusModal
-        isOpen={showChristmasBonus}
+      <NewYearLoginBonusModal
+        isOpen={showNewYearBonus}
         onClose={() => {
-          setShowChristmasBonus(false)
+          setShowNewYearBonus(false)
           fetchUserTickets() // チケット数を更新
         }}
       />

@@ -9,12 +9,12 @@ interface Badge {
   icon: string
 }
 
-interface ChristmasLoginBonusModalProps {
+interface NewYearLoginBonusModalProps {
   isOpen: boolean
   onClose: () => void
 }
 
-export default function ChristmasLoginBonusModal({ isOpen, onClose }: ChristmasLoginBonusModalProps) {
+export default function NewYearLoginBonusModal({ isOpen, onClose }: NewYearLoginBonusModalProps) {
   const [loading, setLoading] = useState(false)
   const [claimed, setClaimed] = useState(false)
   const [ticketsEarned, setTicketsEarned] = useState(0)
@@ -58,22 +58,22 @@ export default function ChristmasLoginBonusModal({ isOpen, onClose }: ChristmasL
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-b from-red-50 to-green-50 rounded-2xl p-6 w-full max-w-md shadow-2xl border-4 border-red-500 relative overflow-hidden">
+      <div className="bg-gradient-to-b from-red-50 to-amber-50 rounded-2xl p-6 w-full max-w-md shadow-2xl border-4 border-red-600 relative overflow-hidden">
         {/* 装飾 */}
-        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-500 via-green-500 to-red-500" />
+        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 via-amber-500 to-red-600" />
 
         {/* ヘッダー */}
         <div className="text-center mb-6">
-          <div className="text-4xl mb-2">🎄</div>
+          <div className="text-4xl mb-2">🎍</div>
           <h2 className="text-2xl font-bold text-red-700">
-            クリスマスログインボーナス
+            年末年始ログインボーナス
           </h2>
           <p className="text-sm text-gray-600 mt-1">12/20〜1/10 限定イベント</p>
         </div>
 
         {loading ? (
           <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-red-500 border-t-transparent" />
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent" />
             <p className="mt-4 text-gray-600">ボーナスを取得中...</p>
           </div>
         ) : error ? (
@@ -90,7 +90,7 @@ export default function ChristmasLoginBonusModal({ isOpen, onClose }: ChristmasL
           <div className="text-center">
             {/* 継続日数 */}
             <div className="mb-4">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-lg">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-red-500 text-white shadow-lg">
                 <div className="text-center">
                   <div className="text-3xl font-bold">{consecutiveDays}</div>
                   <div className="text-xs">日目</div>
@@ -102,7 +102,7 @@ export default function ChristmasLoginBonusModal({ isOpen, onClose }: ChristmasL
             <div className="bg-white rounded-xl p-4 mb-4 shadow-inner">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <span className="text-3xl">🎟️</span>
-                <span className="text-4xl font-bold text-yellow-600">×{ticketsEarned}</span>
+                <span className="text-4xl font-bold text-amber-600">×{ticketsEarned}</span>
               </div>
               <p className="text-lg font-medium text-gray-800">
                 ガチャチケットをゲット！
@@ -125,8 +125,8 @@ export default function ChristmasLoginBonusModal({ isOpen, onClose }: ChristmasL
 
             {/* バッジ獲得 */}
             {badgeAwarded && (
-              <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl p-4 mb-4 border-2 border-yellow-400">
-                <div className="text-lg font-bold text-yellow-700 mb-2">
+              <div className="bg-gradient-to-r from-amber-100 to-red-100 rounded-xl p-4 mb-4 border-2 border-amber-400">
+                <div className="text-lg font-bold text-amber-700 mb-2">
                   🏆 7日継続バッジ獲得！
                 </div>
                 <div className="flex items-center justify-center gap-3">
@@ -149,16 +149,16 @@ export default function ChristmasLoginBonusModal({ isOpen, onClose }: ChristmasL
             {/* 閉じるボタン */}
             <button
               onClick={onClose}
-              className="w-full px-6 py-3 bg-gradient-to-r from-red-500 to-green-500 text-white font-bold rounded-xl hover:from-red-600 hover:to-green-600 transition shadow-lg"
+              className="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-amber-500 text-white font-bold rounded-xl hover:from-red-700 hover:to-amber-600 transition shadow-lg"
             >
               開発を始める！
             </button>
           </div>
         ) : null}
 
-        {/* 装飾：雪の結晶 */}
-        <div className="absolute -top-4 -right-4 text-6xl opacity-20 pointer-events-none">❄️</div>
-        <div className="absolute -bottom-4 -left-4 text-6xl opacity-20 pointer-events-none">❄️</div>
+        {/* 装飾：和風模様 */}
+        <div className="absolute -top-4 -right-4 text-6xl opacity-20 pointer-events-none">🎌</div>
+        <div className="absolute -bottom-4 -left-4 text-6xl opacity-20 pointer-events-none">⛩️</div>
       </div>
     </div>
   )

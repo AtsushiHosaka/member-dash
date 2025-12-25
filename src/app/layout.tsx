@@ -4,6 +4,7 @@ import SessionProvider from '@/components/SessionProvider'
 import GlobalHeader from '@/components/GlobalHeader'
 import PageTransition from '@/components/PageTransition'
 import { Toaster } from '@/components/ui/toaster'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 
 export const metadata: Metadata = {
   title: "Hash - プログラミング時間管理",
@@ -19,10 +20,12 @@ export default function RootLayout({
     <html lang="ja">
       <body>
         <SessionProvider>
-          <GlobalHeader />
-          <PageTransition>
-            {children}
-          </PageTransition>
+          <ThemeProvider>
+            <GlobalHeader />
+            <PageTransition>
+              {children}
+            </PageTransition>
+          </ThemeProvider>
         </SessionProvider>
         <Toaster />
       </body>

@@ -2,9 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* Christmas theme (default) */
+:root,
+.theme-christmas {
   --background: #7F1D1D;
   --foreground: #171717;
+  --theme-bg: #7F1D1D;
+  --theme-primary: #B91C1C;
+  --theme-primary-light: #DC2626;
+  --theme-primary-dark: #991B1B;
+  --theme-accent: #F59E0B;
+  --theme-text-on-bg: #FFFFFF;
+  --theme-card-bg: rgba(255, 255, 255, 0.95);
   --christmas-red: #B91C1C;
   --christmas-red-light: #DC2626;
   --christmas-red-dark: #991B1B;
@@ -12,9 +21,22 @@
   --christmas-red-bg: #7F1D1D;
 }
 
+/* New Year theme */
+.theme-newyear {
+  --background: #FFFFFF;
+  --foreground: #171717;
+  --theme-bg: #FFFFFF;
+  --theme-primary: #DC2626;
+  --theme-primary-light: #EF4444;
+  --theme-primary-dark: #B91C1C;
+  --theme-accent: #F59E0B;
+  --theme-text-on-bg: #171717;
+  --theme-card-bg: rgba(255, 255, 255, 0.98);
+}
+
 body {
   color: var(--foreground);
-  background: var(--christmas-red-bg);
+  background: var(--theme-bg);
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -24,8 +46,60 @@ body {
   }
 }
 
-/* Christmas theme button styles */
+/* Theme-aware classes */
 @layer components {
+  /* Background classes */
+  .theme-bg {
+    background-color: var(--theme-bg);
+  }
+
+  .theme-primary-bg {
+    background-color: var(--theme-primary);
+  }
+
+  .theme-primary-bg-hover:hover {
+    background-color: var(--theme-primary-dark);
+  }
+
+  /* Text classes */
+  .theme-text-on-bg {
+    color: var(--theme-text-on-bg);
+  }
+
+  .theme-text-primary {
+    color: var(--theme-primary);
+  }
+
+  .theme-text-accent {
+    color: var(--theme-accent);
+  }
+
+  /* Border classes */
+  .theme-border {
+    border-color: var(--theme-primary);
+  }
+
+  .theme-border-dark {
+    border-color: var(--theme-primary-dark);
+  }
+
+  /* Card */
+  .theme-card {
+    background-color: var(--theme-card-bg);
+    backdrop-filter: blur(4px);
+  }
+
+  /* Button */
+  .btn-theme {
+    background-color: var(--theme-primary);
+    color: white;
+  }
+
+  .btn-theme:hover {
+    background-color: var(--theme-primary-dark);
+  }
+
+  /* Christmas specific */
   .btn-christmas {
     @apply bg-christmas-red hover:bg-christmas-red-dark text-white font-medium transition-colors;
   }
@@ -36,5 +110,18 @@ body {
 
   .card-christmas {
     @apply bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/20;
+  }
+
+  /* New Year specific */
+  .btn-newyear {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium transition-colors;
+  }
+
+  .card-newyear {
+    @apply bg-white/98 backdrop-blur-sm rounded-xl shadow-lg border border-red-100;
+  }
+
+  .accent-newyear {
+    @apply text-amber-500;
   }
 }

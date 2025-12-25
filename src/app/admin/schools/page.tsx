@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Snowfall from '@/components/Snowfall'
+import ThemeDecorations from '@/components/ThemeDecorations'
 
 interface School {
   id: string
@@ -141,8 +141,8 @@ export default function SchoolsAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-christmas-red-bg py-8 relative overflow-hidden">
-      <Snowfall isAccumulating={false} />
+    <div className="min-h-screen bg-white py-8 relative overflow-hidden">
+      <ThemeDecorations isAccumulating={false} />
       <div className="max-w-4xl mx-auto px-4 relative z-10">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-white">スクール管理</h1>
@@ -169,7 +169,7 @@ export default function SchoolsAdminPage() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-christmas-red text-white rounded-lg hover:bg-christmas-red-dark disabled:bg-gray-400 transition"
+              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition"
             >
               追加
             </button>
@@ -225,7 +225,7 @@ export default function SchoolsAdminPage() {
                         <button
                           onClick={() => startEdit(school)}
                           disabled={loading}
-                          className="px-4 py-2 text-sm text-christmas-red hover:bg-red-50 rounded disabled:bg-gray-400"
+                          className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded disabled:bg-gray-400"
                         >
                           編集
                         </button>

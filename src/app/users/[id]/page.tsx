@@ -12,7 +12,7 @@ import SessionHistoryModal from '@/components/SessionHistoryModal'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import Avatar from '@/components/Avatar'
 import Image from 'next/image'
-import Snowfall from '@/components/Snowfall'
+import ThemeDecorations from '@/components/ThemeDecorations'
 
 // デフォルトの絵文字アイコン一覧
 const DEFAULT_EMOJI_ICONS = [
@@ -452,8 +452,8 @@ export default function UserDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-christmas-red-bg relative overflow-hidden">
-        <Snowfall isAccumulating={false} />
+      <div className="min-h-screen flex items-center justify-center bg-white relative overflow-hidden">
+        <ThemeDecorations isAccumulating={false} />
         <div className="text-xl text-white relative z-10">読み込み中...</div>
       </div>
     )
@@ -461,8 +461,8 @@ export default function UserDetailPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-christmas-red-bg relative overflow-hidden">
-        <Snowfall isAccumulating={false} />
+      <div className="min-h-screen flex items-center justify-center bg-white relative overflow-hidden">
+        <ThemeDecorations isAccumulating={false} />
         <div className="text-xl text-white relative z-10">ユーザーが見つかりません</div>
       </div>
     )
@@ -489,8 +489,8 @@ export default function UserDetailPage() {
   const displaySeasonGoal = isSeasonGoalValid ? user.seasonGoal : null
 
   return (
-    <div className="min-h-screen bg-christmas-red-bg py-8 relative overflow-hidden">
-      <Snowfall isAccumulating={false} />
+    <div className="min-h-screen bg-white py-8 relative overflow-hidden">
+      <ThemeDecorations isAccumulating={false} />
       <div className="max-w-4xl mx-auto px-4 relative z-10">
         <button
           onClick={() => router.back()}
@@ -678,7 +678,7 @@ export default function UserDetailPage() {
             {canAddManualSession() && (
               <button
                 onClick={() => setIsManualModalOpen(true)}
-                className="px-4 py-2 bg-christmas-red text-white rounded-lg hover:bg-christmas-red-dark transition text-sm font-medium"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
               >
                 + 開発記録を追加
               </button>

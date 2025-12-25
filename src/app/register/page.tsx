@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Snowfall from '@/components/Snowfall'
+import ThemeDecorations from '@/components/ThemeDecorations'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -100,10 +100,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-christmas-red-bg py-8 relative overflow-hidden">
-      <Snowfall isAccumulating={false} />
-      <div className="bg-white/95 backdrop-blur-sm p-8 rounded-lg shadow-md w-full max-w-md relative z-10">
-        <h1 className="text-2xl font-bold text-center mb-6 text-christmas-red">Hash 新規登録</h1>
+    <div className="min-h-screen flex items-center justify-center py-8 relative overflow-hidden bg-white">
+      <ThemeDecorations isAccumulating={false} />
+      <div className="p-8 rounded-lg shadow-md w-full max-w-md relative z-10 bg-white border-2 border-red-100">
+        <h1 className="text-2xl font-bold text-center mb-6 text-red-600">
+          🎍 Hash 新規登録
+        </h1>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -230,7 +232,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-christmas-red text-white py-2 rounded-md hover:bg-christmas-red-dark disabled:bg-gray-400 transition"
+            className="w-full text-white py-2 rounded-md disabled:bg-gray-400 transition bg-red-600 hover:bg-red-700"
           >
             {loading ? '登録中...' : '登録'}
           </button>
@@ -238,7 +240,7 @@ export default function RegisterPage() {
 
         <p className="mt-4 text-center text-sm text-gray-600">
           既にアカウントをお持ちの方は
-          <Link href="/login" className="text-christmas-red hover:underline ml-1">
+          <Link href="/login" className="hover:underline ml-1 text-red-600">
             ログイン
           </Link>
         </p>

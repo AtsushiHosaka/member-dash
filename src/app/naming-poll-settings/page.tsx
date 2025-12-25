@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2 } from 'lucide-react'
-import Snowfall from '@/components/Snowfall'
+import ThemeDecorations from '@/components/ThemeDecorations'
 
 interface PollOption {
   id: string
@@ -202,8 +202,8 @@ export default function NamingPollSettingsPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-christmas-red-bg relative overflow-hidden">
-        <Snowfall isAccumulating={false} />
+      <div className="min-h-screen flex items-center justify-center bg-white relative overflow-hidden">
+        <ThemeDecorations isAccumulating={false} />
         <div className="text-xl text-white relative z-10">読み込み中...</div>
       </div>
     )
@@ -217,8 +217,8 @@ export default function NamingPollSettingsPage() {
   const totalVotes = sortedOptions.reduce((sum, option) => sum + option._count.votes, 0)
 
   return (
-    <div className="min-h-screen bg-christmas-red-bg relative overflow-hidden">
-      <Snowfall isAccumulating={false} />
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      <ThemeDecorations isAccumulating={false} />
       <main className="max-w-4xl mx-auto px-4 py-8 relative z-10">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white">命名投票設定</h1>
@@ -256,12 +256,12 @@ export default function NamingPollSettingsPage() {
               onChange={(e) => setNewOptionText(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addOption()}
               placeholder="選択肢のテキストを入力"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-christmas-red focus:border-transparent"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
             />
             <button
               onClick={addOption}
               disabled={addingOption}
-              className="flex items-center gap-2 px-6 py-2 bg-christmas-red text-white rounded-lg font-semibold hover:bg-christmas-red-dark disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+              className="flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
             >
               <Plus className="w-5 h-5" />
               {addingOption ? '追加中...' : '追加'}
@@ -293,7 +293,7 @@ export default function NamingPollSettingsPage() {
                     <div className="flex items-center gap-2">
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
                         <div
-                          className="bg-christmas-red h-2 rounded-full transition-all"
+                          className="bg-red-600 h-2 rounded-full transition-all"
                           style={{
                             width: totalVotes > 0 ? `${(option._count.votes / totalVotes) * 100}%` : '0%'
                           }}

@@ -91,7 +91,7 @@ export default function MentorMembers({ members }: MentorMembersProps) {
               {/* 今週の開発時間 */}
               <div className="text-right flex-shrink-0">
                 <div className="text-sm text-gray-500">今週</div>
-                <div className="text-lg font-bold text-christmas-red">
+                <div className="text-lg font-bold text-red-600">
                   {formatDuration(member.weeklyDuration)}
                 </div>
               </div>

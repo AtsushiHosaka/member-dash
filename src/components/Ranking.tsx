@@ -46,14 +46,14 @@ export default function Ranking({ users, currentUserId, userSchools, onSchoolCha
   }
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-md p-6">
+    <div className="rounded-lg shadow-md p-6 bg-white border-2 border-red-100">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">今週の開発日数</h2>
+        <h2 className="text-xl font-bold">🎍 今週の開発日数</h2>
         {userSchools.length > 1 && (
           <select
             value={selectedSchool}
             onChange={handleSchoolChange}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-christmas-red"
+            className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
           >
             <option value="">全てのスクール</option>
             {userSchools.map(school => (
@@ -67,7 +67,7 @@ export default function Ranking({ users, currentUserId, userSchools, onSchoolCha
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-christmas-red mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mb-4 border-red-600"></div>
           <p className="text-gray-500">読み込み中...</p>
         </div>
       ) : users.length === 0 ? (

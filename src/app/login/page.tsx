@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Snowfall from '@/components/Snowfall'
+import ThemeDecorations from '@/components/ThemeDecorations'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -39,10 +39,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-christmas-red-bg relative overflow-hidden">
-      <Snowfall isAccumulating={false} />
-      <div className="bg-white/95 backdrop-blur-sm p-8 rounded-lg shadow-xl w-full max-w-md relative z-10">
-        <h1 className="text-2xl font-bold text-center mb-6 text-christmas-red">Hash ログイン</h1>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-white">
+      <ThemeDecorations isAccumulating={false} />
+      <div className="p-8 rounded-lg shadow-xl w-full max-w-md relative z-10 bg-white border-2 border-red-100">
+        <h1 className="text-2xl font-bold text-center mb-6 text-red-600">
+          🎍 Hash ログイン
+        </h1>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -61,7 +63,7 @@ export default function LoginPage() {
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-christmas-red"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600"
             />
           </div>
 
@@ -75,14 +77,14 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-christmas-red"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-christmas-red text-white py-2 rounded-md hover:bg-christmas-red-dark disabled:bg-gray-400 transition"
+            className="w-full text-white py-2 rounded-md disabled:bg-gray-400 transition bg-red-600 hover:bg-red-700"
           >
             {loading ? 'ログイン中...' : 'ログイン'}
           </button>

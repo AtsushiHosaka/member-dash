@@ -167,9 +167,17 @@ export async function POST() {
 
     // トランザクションでボーナス記録とチケット付与を行う
     const result = await prisma.$transaction(async (tx) => {
-      // ボーナス記録を作成
-      const bonus = await tx.christmasLoginBonus.create({
-        data: {
+      // ボーナス記録を作成（upsertで重複を回避）
+      const bonus = await tx.christmasLoginBonus.upsert({
+        where: {
+          userId_year_loginDate: {
+            userId,
+            year,
+            loginDate: today
+          }
+        },
+        update: {}, // 既存の場合は何も更新しない
+        create: {
           userId,
           year,
           loginDate: today,
@@ -177,6 +185,11 @@ export async function POST() {
           ticketsEarned
         }
       })
+
+      // 既に存在していた場合は早期リターン（チケット付与しない）
+      if (bonus.consecutiveDays !== consecutiveDays) {
+        return { bonus, alreadyExists: true }
+      }
 
       // ユーザーのガチャチケットを増やす
       await tx.user.update({
@@ -224,8 +237,17 @@ export async function POST() {
         }
       }
 
-      return { bonus, badgeAwarded }
+      return { bonus, badgeAwarded, alreadyExists: false }
     })
+
+    // 既に受け取っていた場合
+    if (result.alreadyExists) {
+      return NextResponse.json({
+        success: false,
+        error: '今日のボーナスは既に受け取っています',
+        bonus: result.bonus
+      }, { status: 400 })
+    }
 
     // 更新後のユーザー情報を取得
     const updatedUser = await prisma.user.findUnique({

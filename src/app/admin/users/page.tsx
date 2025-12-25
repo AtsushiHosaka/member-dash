@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useToast } from '@/hooks/use-toast'
 import BulkImportModal from '@/components/BulkImportModal'
-import Snowfall from '@/components/Snowfall'
+import ThemeDecorations from '@/components/ThemeDecorations'
 
 interface School {
   id: string
@@ -193,8 +193,8 @@ export default function UsersAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-christmas-red-bg py-8 relative overflow-hidden">
-      <Snowfall isAccumulating={false} />
+    <div className="min-h-screen bg-white py-8 relative overflow-hidden">
+      <ThemeDecorations isAccumulating={false} />
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-white">ユーザー管理</h1>
@@ -211,7 +211,7 @@ export default function UsersAdminPage() {
             <h2 className="text-lg font-semibold">全ユーザー一覧</h2>
             <button
               onClick={() => setIsBulkImportOpen(true)}
-              className="px-4 py-2 bg-christmas-red text-white rounded-lg hover:bg-christmas-red-dark transition text-sm font-medium"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
             >
               + 一括追加
             </button>

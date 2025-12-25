@@ -23,10 +23,29 @@ const config: Config = {
           white: '#FAFAFA',
           gold: '#F59E0B',
         },
+        // New Year theme colors
+        newyear: {
+          red: {
+            DEFAULT: '#DC2626', // 日本の赤
+            light: '#EF4444',
+            dark: '#B91C1C',
+            darker: '#991B1B',
+          },
+          gold: {
+            DEFAULT: '#F59E0B', // 金色
+            light: '#FBBF24',
+            dark: '#D97706',
+          },
+          white: '#FFFFFF',
+          cream: '#FFFBEB', // 和紙のようなクリーム色
+        },
       },
       animation: {
         'snow-fall': 'snowfall linear infinite',
         'snow-accumulate': 'snowAccumulate 0.5s ease-out forwards',
+        'float': 'float 6s ease-in-out infinite',
+        'float-slow': 'float 8s ease-in-out infinite',
+        'sway': 'sway 4s ease-in-out infinite',
       },
       keyframes: {
         snowfall: {
@@ -36,6 +55,14 @@ const config: Config = {
         snowAccumulate: {
           '0%': { transform: 'translateY(-10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+          '50%': { transform: 'translateY(-10px) rotate(5deg)' },
+        },
+        sway: {
+          '0%, 100%': { transform: 'rotate(-3deg)' },
+          '50%': { transform: 'rotate(3deg)' },
         },
       },
     },
