@@ -12,7 +12,7 @@ import StartSessionModal from '@/components/StartSessionModal'
 import Ranking from '@/components/Ranking'
 import ActiveMembers from '@/components/ActiveMembers'
 import MentorMembers from '@/components/MentorMembers'
-import NewYearLoginBonusModal from '@/components/NewYearLoginBonusModal'
+import OmikujiModal from '@/components/OmikujiModal'
 import ThemeDecorations from '@/components/ThemeDecorations'
 // import NamingPoll from '@/components/NamingPoll'
 
@@ -48,8 +48,8 @@ export default function Dashboard() {
   const [seasonGoal, setSeasonGoal] = useState<string | null>(null)
   const [seasonGoalInput, setSeasonGoalInput] = useState('')
   const [isSubmittingSeasonGoal, setIsSubmittingSeasonGoal] = useState(false)
-  const [showNewYearBonus, setShowNewYearBonus] = useState(false)
-  const [newYearBonusChecked, setNewYearBonusChecked] = useState(false)
+  const [showOmikuji, setShowOmikuji] = useState(false)
+  const [omikujiChecked, setOmikujiChecked] = useState(false)
 
   // 全てのローディングが完了したかチェック
   useEffect(() => {
@@ -64,6 +64,8 @@ export default function Dashboard() {
     const allLoaded = requiredLoads.every(state => !state)
     if (allLoaded && status === 'authenticated') {
       setInitialLoading(false)
+      // ローディング完了後におみくじをチェック
+      checkOmikuji()
     }
   }, [loadingStates, status, session])
 
@@ -98,26 +100,30 @@ export default function Dashboard() {
         setLoadingStates(prev => ({ ...prev, mentorMembers: false }))
       }
 
-      // 年末年始ログインボーナスをチェック
-      checkNewYearBonus()
     }
   }, [status, session])
 
-  const checkNewYearBonus = async () => {
-    if (newYearBonusChecked) return
-    setNewYearBonusChecked(true)
+  // おみくじの日付チェック（日本時間で1/1~1/10）
+  const checkOmikuji = () => {
+    if (omikujiChecked) return
+    setOmikujiChecked(true)
 
-    try {
-      const response = await fetch('/api/christmas-bonus')
-      if (response.ok) {
-        const data = await response.json()
-        // イベント期間中で、まだ今日のボーナスを受け取っていない場合
-        if (data.isEventPeriod && !data.alreadyClaimed) {
-          setShowNewYearBonus(true)
-        }
-      }
-    } catch (error) {
-      console.error('Failed to check New Year bonus:', error)
+    // 日本時間を取得
+    const now = new Date()
+    const jstOffset = 9 * 60 // JST is UTC+9
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000)
+    const jstDate = new Date(utc + (jstOffset * 60000))
+
+    const month = jstDate.getMonth() + 1 // 0-indexed
+    const day = jstDate.getDate()
+    const hour = jstDate.getHours()
+    const minute = jstDate.getMinutes()
+
+    // 1月1日0:00 〜 1月10日23:59 の間
+    const isOmikujiPeriod = month === 1 && day >= 1 && day <= 10
+
+    if (isOmikujiPeriod) {
+      setShowOmikuji(true)
     }
   }
 
@@ -733,12 +739,9 @@ export default function Dashboard() {
         goal={activeSession?.goal}
       />
 
-      <NewYearLoginBonusModal
-        isOpen={showNewYearBonus}
-        onClose={() => {
-          setShowNewYearBonus(false)
-          fetchUserTickets() // チケット数を更新
-        }}
+      <OmikujiModal
+        isOpen={showOmikuji}
+        onClose={() => setShowOmikuji(false)}
       />
     </div>
   )
