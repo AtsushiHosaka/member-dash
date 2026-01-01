@@ -135,7 +135,7 @@ export default function OmikujiModal({ isOpen, onClose }: OmikujiModalProps) {
             <h2 className="text-2xl font-bold text-red-700">
               新年おみくじ
             </h2>
-            <p className="text-sm text-gray-600 mt-1">2025年の運勢は...？</p>
+            <p className="text-sm text-gray-600 mt-1">2026年の運勢は...？</p>
           </div>
 
           {/* ローディング・シェイク状態 */}
