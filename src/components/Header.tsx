@@ -19,9 +19,11 @@ interface HeaderProps {
   isAdmin: boolean
   isMentor: boolean
   gachaTickets: number
+  isValentine?: boolean
+  valentineHours?: number
 }
 
-export default function Header({ userName, userId, isAdmin, isMentor, gachaTickets }: HeaderProps) {
+export default function Header({ userName, userId, isAdmin, isMentor, gachaTickets, isValentine = false, valentineHours = 0 }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
@@ -54,10 +56,16 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
     closeMenu()
   }
 
+  // テーマに応じたスタイル
+  const headerBg = isValentine ? 'bg-[#8A0000]' : 'bg-red-600'
+  const headerBorder = isValentine ? 'border-[#3B060A]' : 'border-red-700'
+  const hoverBg = isValentine ? 'hover:bg-[#6A0000]' : 'hover:bg-red-700'
+  const themeEmoji = isValentine ? '🍫' : '🎍'
+
   return (
-    <header className="shadow-lg border-b sticky top-0 z-50 bg-red-600 border-red-700">
+    <header className={`shadow-lg border-b sticky top-0 z-50 ${headerBg} ${headerBorder}`}>
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        {/* Logo */}
+        {/* Logo and Valentine Bonus */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push('/')}
@@ -71,15 +79,28 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
               className="w-8 h-8 object-contain"
             />
             <span className="text-2xl font-bold text-white">Hash</span>
-            <span className="text-amber-300 text-sm ml-1">🎍</span>
+            <span className={`text-sm ml-1 ${isValentine ? 'text-[#D4A574]' : 'text-amber-300'}`}>{themeEmoji}</span>
           </button>
+
+          {/* Valentine Bonus Display */}
+          {isValentine && (
+            <button
+              onClick={() => router.push('/valentine')}
+              className="flex items-center gap-2 px-3 py-1.5 bg-[#3B060A] rounded-lg hover:bg-[#5A0A10] transition ml-2"
+            >
+              <span className="text-[#D4A574]">🍫</span>
+              <span className="text-[#D4A574] text-sm font-medium">
+                {valentineHours.toFixed(1)}h
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Desktop: User name and hamburger menu */}
         <div className="flex items-center gap-3">
           <button
             onClick={handleUserNameClick}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white rounded-lg transition hover:bg-red-700"
+            className={`flex items-center gap-2 px-3 py-2 text-sm font-medium text-white rounded-lg transition ${hoverBg}`}
           >
             <UserCircle className="w-4 h-4" />
             {userName}
@@ -90,25 +111,25 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
               <Button
                 variant="ghost"
                 size="sm"
-                className="p-2 text-white hover:text-white hover:bg-red-700"
+                className={`p-2 text-white hover:text-white ${hoverBg}`}
               >
                 {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </Button>
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-[280px] sm:w-[350px] bg-red-600 border-red-700"
+              className={`w-[280px] sm:w-[350px] ${headerBg} ${headerBorder}`}
             >
               <SheetHeader>
                 <SheetTitle className="text-left text-white">
-                  🎍 メニュー
+                  {themeEmoji} メニュー
                 </SheetTitle>
               </SheetHeader>
               <div className="mt-6 space-y-1">
                 {/* User Info - clickable */}
                 <button
                   onClick={handleUserNameClick}
-                  className="w-full px-3 py-4 rounded-lg mb-4 transition text-left bg-amber-500/20 hover:bg-amber-500/30"
+                  className={`w-full px-3 py-4 rounded-lg mb-4 transition text-left ${isValentine ? 'bg-[#D4A574]/20 hover:bg-[#D4A574]/30' : 'bg-amber-500/20 hover:bg-amber-500/30'}`}
                 >
                   <div className="flex items-center gap-2 text-sm text-white/80 mb-1">
                     <UserCircle className="w-4 h-4" />
@@ -122,7 +143,7 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
                   <button
                     key={item.path}
                     onClick={() => handleNavigation(item.path)}
-                    className="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-white rounded-lg transition hover:bg-red-700"
+                    className={`w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-white rounded-lg transition ${hoverBg}`}
                   >
                     <item.icon className="w-5 h-5" />
                     {item.label}
@@ -130,7 +151,7 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
                 ))}
 
                 {/* Divider */}
-                <div className="border-t my-3 border-amber-500/30"></div>
+                <div className={`border-t my-3 ${isValentine ? 'border-[#D4A574]/30' : 'border-amber-500/30'}`}></div>
 
                 {/* お問い合わせフォーム */}
                 <a
@@ -138,7 +159,7 @@ export default function Header({ userName, userId, isAdmin, isMentor, gachaTicke
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={closeMenu}
-                  className="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-white rounded-lg transition hover:bg-red-700"
+                  className={`w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-white rounded-lg transition ${hoverBg}`}
                 >
                   <MessageCircle className="w-5 h-5" />
                   お問い合わせ

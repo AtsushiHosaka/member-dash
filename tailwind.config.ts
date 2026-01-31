@@ -39,6 +39,25 @@ const config: Config = {
           white: '#FFFFFF',
           cream: '#FFFBEB', // 和紙のようなクリーム色
         },
+        // Valentine theme colors
+        valentine: {
+          red: {
+            DEFAULT: '#8A0000', // 深い赤
+            light: '#A30000',
+            dark: '#6A0000',
+          },
+          brown: {
+            DEFAULT: '#3B060A', // ダークチョコ色
+            light: '#5A0A10',
+            chocolate: '#5D2A1A',
+          },
+          milk: {
+            DEFAULT: '#D4A574', // ミルクチョコ色
+            light: '#E4B584',
+            dark: '#C49464',
+          },
+          cream: '#FFF5EB', // クリーム背景
+        },
       },
       animation: {
         'snow-fall': 'snowfall linear infinite',

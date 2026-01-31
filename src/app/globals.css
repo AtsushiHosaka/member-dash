@@ -34,6 +34,22 @@
   --theme-card-bg: rgba(255, 255, 255, 0.98);
 }
 
+/* Valentine theme */
+.theme-valentine {
+  --background: #FFF5EB;
+  --foreground: #171717;
+  --theme-bg: #FFF5EB;
+  --theme-primary: #8A0000;
+  --theme-primary-light: #A30000;
+  --theme-primary-dark: #6A0000;
+  --theme-accent: #D4A574;
+  --theme-text-on-bg: #171717;
+  --theme-card-bg: rgba(255, 255, 255, 0.98);
+  --valentine-brown: #3B060A;
+  --valentine-chocolate: #5D2A1A;
+  --valentine-milk: #D4A574;
+}
+
 body {
   color: var(--foreground);
   background: var(--theme-bg);
@@ -123,5 +139,22 @@ body {
 
   .accent-newyear {
     @apply text-amber-500;
+  }
+
+  /* Valentine specific */
+  .btn-valentine {
+    @apply bg-[#8A0000] hover:bg-[#6A0000] text-white font-medium transition-colors;
+  }
+
+  .btn-valentine-dark {
+    @apply bg-[#3B060A] hover:bg-[#5A0A10] text-white font-medium transition-colors;
+  }
+
+  .card-valentine {
+    @apply bg-white/98 backdrop-blur-sm rounded-xl shadow-lg border border-[#D4A574]/30;
+  }
+
+  .accent-valentine {
+    @apply text-[#D4A574];
   }
 }

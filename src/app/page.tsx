@@ -14,11 +14,13 @@ import ActiveMembers from '@/components/ActiveMembers'
 import MentorMembers from '@/components/MentorMembers'
 import OmikujiModal from '@/components/OmikujiModal'
 import ThemeDecorations from '@/components/ThemeDecorations'
+import { useTheme } from '@/contexts/ThemeContext'
 // import NamingPoll from '@/components/NamingPoll'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { isValentine } = useTheme()
   const [currentTime, setCurrentTime] = useState(new Date())
   const [activeSession, setActiveSession] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -103,7 +105,7 @@ export default function Dashboard() {
     }
   }, [status, session])
 
-  // おみくじの日付チェック（日本時間で1/1~1/10）
+  // おみくじの日付チェック（日本時間で1/1~1/10、かつバレンタイン期間外）
   const checkOmikuji = () => {
     if (omikujiChecked) return
     setOmikujiChecked(true)
@@ -116,8 +118,14 @@ export default function Dashboard() {
 
     const month = jstDate.getMonth() + 1 // 0-indexed
     const day = jstDate.getDate()
-    const hour = jstDate.getHours()
-    const minute = jstDate.getMinutes()
+
+    // 1月31日以降はバレンタイン期間なのでおみくじを表示しない
+    if (month === 1 && day >= 31) {
+      return
+    }
+    if (month === 2) {
+      return
+    }
 
     // 1月1日0:00 〜 1月10日23:59 の間
     const isOmikujiPeriod = month === 1 && day >= 1 && day <= 10
@@ -444,20 +452,27 @@ export default function Dashboard() {
     }
   }
 
+  // テーマに応じた背景色
+  const bgColor = isValentine ? 'bg-[#FFF5EB]' : 'bg-white'
+  const primaryColor = isValentine ? 'bg-[#8A0000]' : 'bg-red-600'
+  const accentColor = isValentine ? 'bg-[#D4A574]' : 'bg-amber-500'
+  const ringColor = isValentine ? 'border-[#D4A574]' : 'border-red-200'
+  const spinColor = isValentine ? 'border-t-[#8A0000]' : 'border-t-red-600'
+
   if (status === 'loading' || (status === 'authenticated' && initialLoading)) {
     return (
-      <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-white">
+      <div className={`min-h-screen flex items-center justify-center relative overflow-hidden ${bgColor}`}>
         <ThemeDecorations isAccumulating={false} />
         <div className="text-center relative z-10">
           {/* ローディングアニメーション */}
           <div className="relative w-20 h-20 mx-auto mb-6">
             {/* 外側のリング */}
-            <div className="absolute inset-0 border-4 rounded-full border-red-200"></div>
+            <div className={`absolute inset-0 border-4 rounded-full ${ringColor}`}></div>
             {/* アニメーションするリング */}
-            <div className="absolute inset-0 border-4 border-transparent rounded-full animate-spin border-t-red-600"></div>
+            <div className={`absolute inset-0 border-4 border-transparent rounded-full animate-spin ${spinColor}`}></div>
             {/* 中央のドット */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-3 h-3 rounded-full animate-pulse bg-red-600"></div>
+              <div className={`w-3 h-3 rounded-full animate-pulse ${primaryColor}`}></div>
             </div>
           </div>
           {/* テキスト */}
@@ -469,9 +484,9 @@ export default function Dashboard() {
           </div>
           {/* プログレスドット */}
           <div className="flex justify-center gap-1 mt-4">
-            <div className="w-2 h-2 rounded-full animate-bounce bg-red-600" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 rounded-full animate-bounce bg-amber-500" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 rounded-full animate-bounce bg-red-600" style={{ animationDelay: '300ms' }}></div>
+            <div className={`w-2 h-2 rounded-full animate-bounce ${primaryColor}`} style={{ animationDelay: '0ms' }}></div>
+            <div className={`w-2 h-2 rounded-full animate-bounce ${accentColor}`} style={{ animationDelay: '150ms' }}></div>
+            <div className={`w-2 h-2 rounded-full animate-bounce ${primaryColor}`} style={{ animationDelay: '300ms' }}></div>
           </div>
         </div>
       </div>
@@ -491,7 +506,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-white">
+    <div className={`min-h-screen relative overflow-hidden ${bgColor}`}>
       <ThemeDecorations isAccumulating={!!activeSession} />
       <main className="max-w-6xl mx-auto px-4 py-6 md:py-8 relative z-10">
         <ActiveMembers members={activeMembers} />

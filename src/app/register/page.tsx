@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ThemeDecorations from '@/components/ThemeDecorations'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { isValentine } = useTheme()
   const [userId, setUserId] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
@@ -16,6 +18,14 @@ export default function RegisterPage() {
   const [schools, setSchools] = useState<any[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // テーマに応じたスタイル
+  const themeEmoji = isValentine ? '🍫' : '🎍'
+  const bgColor = isValentine ? 'bg-[#FFF5EB]' : 'bg-white'
+  const borderColor = isValentine ? 'border-[#D4A574]' : 'border-red-100'
+  const titleColor = isValentine ? 'text-[#8A0000]' : 'text-red-600'
+  const buttonBg = isValentine ? 'bg-[#8A0000] hover:bg-[#6A0000]' : 'bg-red-600 hover:bg-red-700'
+  const linkColor = isValentine ? 'text-[#8A0000]' : 'text-red-600'
 
   const courses = ['iPhone', 'WebS', 'WebD', 'Unity', 'AI', 'Movie']
   const avatarEmojis = ['😀', '😎', '🤓', '😊', '🥳', '🤔', '😴', '🤖', '👻', '🦄']
@@ -100,11 +110,11 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-8 relative overflow-hidden bg-white">
+    <div className={`min-h-screen flex items-center justify-center py-8 relative overflow-hidden ${bgColor}`}>
       <ThemeDecorations isAccumulating={false} />
-      <div className="p-8 rounded-lg shadow-md w-full max-w-md relative z-10 bg-white border-2 border-red-100">
-        <h1 className="text-2xl font-bold text-center mb-6 text-red-600">
-          🎍 Hash 新規登録
+      <div className={`p-8 rounded-lg shadow-md w-full max-w-md relative z-10 bg-white border-2 ${borderColor}`}>
+        <h1 className={`text-2xl font-bold text-center mb-6 ${titleColor}`}>
+          {themeEmoji} Hash 新規登録
         </h1>
 
         {error && (
@@ -232,7 +242,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full text-white py-2 rounded-md disabled:bg-gray-400 transition bg-red-600 hover:bg-red-700"
+            className={`w-full text-white py-2 rounded-md disabled:bg-gray-400 transition ${buttonBg}`}
           >
             {loading ? '登録中...' : '登録'}
           </button>
@@ -240,7 +250,7 @@ export default function RegisterPage() {
 
         <p className="mt-4 text-center text-sm text-gray-600">
           既にアカウントをお持ちの方は
-          <Link href="/login" className="hover:underline ml-1 text-red-600">
+          <Link href="/login" className={`hover:underline ml-1 ${linkColor}`}>
             ログイン
           </Link>
         </p>
