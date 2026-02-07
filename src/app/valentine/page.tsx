@@ -155,7 +155,7 @@ export default function ValentinePage() {
                 開発時間に応じてチョコ作りが進みます！
               </p>
               <p className="text-sm">
-                期間: 1月31日〜2月13日
+                期間: 1月31日〜2月14日
               </p>
             </div>
           )}
@@ -170,6 +170,27 @@ export default function ValentinePage() {
             </div>
           )}
         </motion.div>
+
+        {/* 現在のチョコ数 */}
+        {progress && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white/90 rounded-xl p-6 shadow-lg mb-8"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm text-[#8A0000]/70 mb-1">
+                  現在のチョコストック
+                </div>
+                <div className="text-3xl font-bold text-[#3B060A]">
+                  {progress.chocolateCount} 個
+                </div>
+              </div>
+              <div className="text-4xl">🍫</div>
+            </div>
+          </motion.div>
+        )}
 
         {error ? (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">

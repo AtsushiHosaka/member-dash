@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 
 // バレンタインイベント期間（JST）
 const EVENT_START = new Date('2026-01-31T00:00:00+09:00')
-const EVENT_END = new Date('2026-02-13T23:59:59+09:00')
+const EVENT_END = new Date('2026-02-14T23:59:59+09:00')
 
 // 既存のバッジIDを使用
 const BADGE_IDS = {
@@ -14,10 +14,11 @@ const BADGE_IDS = {
   chocolate20: 'cml22ia5t0002juzsoz972bvq'   // チョコ20個 (29h開発)
 }
 
-// 完成チョコ数を計算
-function getChocolateCount(hours: number): number {
-  if (hours < 10) return 0
-  return Math.floor(hours - 9)
+// 完成チョコ数を計算（1.5時間ごとに1個）
+function getChocolateCount(totalSeconds: number): number {
+  const perChocolateSeconds = 90 * 60
+  if (totalSeconds < perChocolateSeconds) return 0
+  return Math.floor(totalSeconds / perChocolateSeconds)
 }
 
 // Cron認証またはadmin認証をチェック
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
       // 合計時間を計算
       const totalSeconds = sessions.reduce((sum, s) => sum + (s.duration || 0), 0)
       const totalHours = totalSeconds / 3600
-      const chocolateCount = getChocolateCount(totalHours)
+      const chocolateCount = getChocolateCount(totalSeconds)
 
       // チョコがない場合はスキップ
       if (chocolateCount === 0) continue
