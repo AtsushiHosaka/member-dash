@@ -2,27 +2,19 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-
-// バレンタインイベント期間（JST）
-const EVENT_START = new Date('2026-01-31T00:00:00+09:00')
-const EVENT_END = new Date('2026-02-14T23:59:59+09:00')
-const RESULT_DISPLAY_END = new Date('2026-02-28T23:59:59+09:00')
+import { getValentineProgressTotals } from '@/lib/valentine-progress'
+import {
+  isValentineEventPeriod,
+  isValentineResultDisplayPeriod,
+  VALENTINE_EVENT_END,
+  VALENTINE_EVENT_START,
+} from '@/lib/valentine'
 
 // 既存のバッジID
 const BADGE_IDS = {
   chocolate1: 'cml22hq6k0000juzs6dg3j02h',   // チョコ1個 (10h開発)
   chocolate10: 'cml22hzuo0001juzsdj1pmo8f',  // チョコ10個 (19h開発)
   chocolate20: 'cml22ia5t0002juzsoz972bvq'   // チョコ20個 (29h開発)
-}
-
-// イベント期間内かどうかをチェック
-function isEventPeriod(date: Date): boolean {
-  return date >= EVENT_START && date <= EVENT_END
-}
-
-// 結果表示期間内かどうかをチェック
-function isResultDisplayPeriod(date: Date): boolean {
-  return date > EVENT_END && date <= RESULT_DISPLAY_END
 }
 
 // 進捗ステージを計算
@@ -33,13 +25,6 @@ function getProgressStage(hours: number): string {
   if (hours < 8) return 'molding'
   if (hours < 10) return 'cooling'
   return 'complete'
-}
-
-// 完成チョコ数を計算（1.5時間ごとに1個）
-function getChocolateCount(totalSeconds: number): number {
-  const perChocolateSeconds = 90 * 60
-  if (totalSeconds < perChocolateSeconds) return 0
-  return Math.floor(totalSeconds / perChocolateSeconds)
 }
 
 // バレンタイン進捗を取得
@@ -55,7 +40,7 @@ export async function GET() {
     const now = new Date()
 
     // イベント期間外かつ結果表示期間外
-    if (!isEventPeriod(now) && !isResultDisplayPeriod(now)) {
+    if (!isValentineEventPeriod(now) && !isValentineResultDisplayPeriod(now)) {
       return NextResponse.json({
         isEventPeriod: false,
         isResultPeriod: false,
@@ -63,53 +48,10 @@ export async function GET() {
       })
     }
 
-    // イベント期間中のセッションを取得
-    const sessions = await prisma.session.findMany({
-      where: {
-        userId,
-        startTime: {
-          gte: EVENT_START,
-          lte: EVENT_END
-        },
-        isActive: false,
-        duration: { not: null }
-      },
-      select: {
-        duration: true,
-        startTime: true
-      }
-    })
-
-    // アクティブセッションがあれば、経過時間を加算（イベント期間中のみ）
-    let activeSessionSeconds = 0
-    if (isEventPeriod(now)) {
-      const activeSession = await prisma.session.findFirst({
-        where: {
-          userId,
-          isActive: true,
-          startTime: {
-            gte: EVENT_START
-          }
-        },
-        select: {
-          startTime: true
-        }
-      })
-
-      if (activeSession) {
-        const elapsed = Math.floor((now.getTime() - new Date(activeSession.startTime).getTime()) / 1000)
-        activeSessionSeconds = Math.max(0, elapsed)
-      }
-    }
-
-    // 合計時間を計算
-    const completedSeconds = sessions.reduce((sum, s) => sum + (s.duration || 0), 0)
-    const totalSeconds = completedSeconds + activeSessionSeconds
-    const totalHours = totalSeconds / 3600
+    const { totalSeconds, totalHours, chocolateCount } = await getValentineProgressTotals(userId, now)
 
     // 進捗情報を計算
     const progressStage = getProgressStage(totalHours)
-    const chocolateCount = getChocolateCount(totalSeconds)
 
     // 次のステージまでの時間
     let nextStageHours: number | null = null
@@ -138,15 +80,15 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      isEventPeriod: isEventPeriod(now),
-      isResultPeriod: isResultDisplayPeriod(now),
+      isEventPeriod: isValentineEventPeriod(now),
+      isResultPeriod: isValentineResultDisplayPeriod(now),
       totalSeconds,
       totalHours: Math.round(totalHours * 100) / 100,
       chocolateCount,
       progressStage,
       nextStageHours,
-      eventStartDate: EVENT_START.toISOString(),
-      eventEndDate: EVENT_END.toISOString(),
+      eventStartDate: VALENTINE_EVENT_START.toISOString(),
+      eventEndDate: VALENTINE_EVENT_END.toISOString(),
       badges: badgeInfo
     })
   } catch (error) {

@@ -330,6 +330,20 @@ export default function Dashboard() {
         if (responseData.ticketsEarned > 0) {
           alert(`おめでとうございます！ガチャ券を${responseData.ticketsEarned}枚獲得しました！`)
         }
+
+        // バレンタイン当日機能が有効かつ未選択なら、終了後にselect画面へ遷移
+        try {
+          const valentineDayResponse = await fetch('/api/valentine/day')
+          if (valentineDayResponse.ok) {
+            const valentineDayData = await valentineDayResponse.json()
+            if (valentineDayData.isActiveWindow && !valentineDayData.hasSelected) {
+              router.push('/valentine-select')
+              return
+            }
+          }
+        } catch (dayError) {
+          console.error('Failed to check valentine day status:', dayError)
+        }
       } else {
         const error = await response.json()
         alert(error.error || '開発終了に失敗しました')

@@ -33,6 +33,7 @@ model User {
   userBadges            UserBadge[]    // 獲得したバッジ
   mentorLinks           MentorMember[] @relation("MemberToMentors") // メンバーが持つメンター関係
   memberLinks           MentorMember[] @relation("MentorToMembers") // メンターが持つメンバー関係
+  valentineMentorSelections ValentineMentorSelection[]
   seasonGoal            String?        // 今期の目標
   seasonGoalExpiresAt   DateTime?      // 今期の目標の有効期限
   createdAt             DateTime       @default(now())
@@ -84,6 +85,19 @@ model Session {
 
   createdAt     DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
+}
+
+model ValentineMentorSelection {
+  id        String   @id @default(cuid())
+  userId    String
+  eventCode String
+  mentorKey String
+  giftType  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, eventCode])
+  @@index([eventCode, mentorKey])
 }
 
 // セッション編集履歴
